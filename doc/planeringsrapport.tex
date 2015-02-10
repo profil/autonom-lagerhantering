@@ -1,8 +1,8 @@
 \documentclass[a4paper,11pt]{article}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
 \usepackage[swedish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage[lighttt]{lmodern}
 \usepackage{parskip}
 %\usepackage{amsmath}
@@ -30,39 +30,38 @@
 Den industriella revolutionen sträcker sig från tidigt 1700-tal till idag
 där människan har, i samklang med naturen och tekniska möjligheter,
 utvecklat och förbättrat tekniker i syfte att skapa robustare system med
-högre produktivitet. Allt från "Spinning Jenny" till James Watts ångmaskin
+högre produktivitet. Allt från ''Spinning Jenny'' till James Watts ångmaskin
 har förenklat människans vardag och tillfälligt stillat den eviga strävan
-efter ständiga förbättringar som genomlyser människans långa
-historia.[REFERENS]
+efter ständiga förbättringar som genomsyrar människans långa historia
+\cite{organisationochorganisering}.
 
 Vad gäller effektiva materialflöden inom produktion tog Henry Ford det
 historiskt viktiga steget när han införde löpande-band-principen i sin
 bilfabrik, en förändring som kom att ligga till grund för de flesta mass-
 och serieproduktionssystem idag. Ford utmanade gängse normer genom
-banbrytande idéer för att vägleda monteringsobjektens genom fabriken förbi
+banbrytande idéer för att vägleda monteringsobjekten genom fabriken förbi
 montörer och operatörer, så kallad linelayout. Senare vidareutvecklades
 drivning av linan till att bli helt automatiserad och därigenom mer
-resurseffektiv.[REFERENS]
- 
-Ytterliggare ett steg i utvecklingen är att tillåta en automatiserad
+resurseffektiv \cite{organisationochorganisering}.
+
+Ytterligare ett steg i utvecklingen är att tillåta en automatiserad
 materialförsörjning i allt från lagermiljöer till massproduktionslinor.
 Istället för en manuell materialhantering där lagerarbetare och truckförare
-rör sig genom lagermiljöer för att försörja monteringsbalanser eller
+rör sig genom lagermiljöer för att försörja monterings- eller
 packningsstationer med rätt material och produkter så automatiseras
-processen. 
+processen.
 
 Enligt Toyotas teorier om LEAN production är rörelser i ett system en av de
 \emph{7+1 slöserierna} och bör undvikas i största möjliga mån. Genom att
 automatisera materialförsörjningen minimeras de mänskliga rörelserna vilket
 medför att en större del av det mänskliga arbetet åtgår till värdeskapande
-aktiviteter.[REFERENS]
-
-Tidigare års kandidatarbeten som berör ämnet grundades på en AGV\footnote{Automated
+aktiviteter \cite{organisationochorganisering}. Tidigare års
+kandidatarbeten som berör ämnet grundades på en AGV\footnote{Automated
 Guided Vehicle} som autonomt åker mellan lagerplatser och annan godtyckligt
-definerad position. Dessa arbeten ligger till grund för ett fortsatt arbete
-med projektet där fokus ligger på att använda den kunskapen som förvärvats
-och utveckla den för att nå längre och uppnå bättre resultat.
-
+definierad position. Dessa arbeten ligger till grund för ett fortsatt
+arbete med projektet där fokus ligger på att använda den kunskap som
+förvärvats och utveckla den för att nå längre och uppnå bättre resultat.
+ 
 
 \section{Syfte}
 Avsikten med projektet är att genom vidareutveckling av föregående års
@@ -72,13 +71,12 @@ ska AGV:er koordineras till att transportera förutbestämd lagerinredning
 till bestämda platser för att till exempel en montör ska slippa hämta detta
 själv. Systemet ska vara möjligt att implementera i ett lagersystem med
 flera AGV:er och varje AGV utrustas med ett kollisionssystem för att
-undvika hinder. Målet är att på ett effektivt och tillförlitligt sätt
-minimera kostnader samt reducera personskador i anknytning till
-materialhantering i lagermiljöer.
+undvika hinder. Målet är att öka effektiviteten och på ett effektivt och
+tillförlitligt sätt minimera kostnader samt reducera personskador och höja
+ergonomin i anknytning till materialhantering i lagermiljöer. 
 
 
 \section{Problem/Uppgift}
-
 Huvudproblemet grundas i att en AGV autonomt ska kunna navigera mellan
 kända positioner i en känd miljö, där den ska ha möjlighet att utifrån ett
 överordnat system ta order och genomföra leveranser. AGV:n ska även undvika
@@ -94,13 +92,15 @@ upp i följande delsystem:
 
   \item Plockstationen skall
   \begin{enumerate}
-    \item Ge order till det överordnade systemet om vad som skall hämtas via ett lämpligt interface
+    \item Ge order till det överordnade systemet om vad som skall hämtas
+		via ett lämpligt gränssnitt
     \item Godkänna när rätt order blivit plockad så att AGV:n kan återlämna lagerhyllan
   \end{enumerate}
 
   \item Navigationssystem skall
   \begin{enumerate}
     \item Möjliggöra ett system i lagerlokalen som AGV:n kan navigera efter
+	\item Vara kommersiellt gångbart
   \end{enumerate}
 
   \item AGV:n skall
@@ -109,15 +109,16 @@ upp i följande delsystem:
     \item Utrustas med en anordning som möjliggör transport av lagerhyllan
     \item Kontrollera att rätt lagerhylla hämtas
     \item Undvika kollision med rörliga och stationära hinder
-    \item Kontinuerligt placera lagerhyllan på angiven plats, inom rimlig marginal
+    \item Placera lagerhyllan på angiven plats, inom rimlig marginal
   \end{enumerate}
 
   \item Överordnade system skall
   \begin{enumerate}
-    \item Håller koll på vilken order som skall hämtas
+    \item Hålla koll på vilken order som skall hämtas
     \item Ruttplanera AGV:ns väg till och från målet
     \item Undvika att kollision med andra AGV:er uppstår
-    \item Tillhandahålla ett interface som möjligör orderhantering och uppdaterar användaren med status av orderhämtning.
+	\item Tillhandahålla ett gränssnitt som möjligör orderhantering och
+		uppdaterar användaren med status av orderhämtning.
     \item Hålla reda på lagerhyllornas position
   \end{enumerate}
 \end{enumerate}
@@ -126,13 +127,13 @@ upp i följande delsystem:
 
 \section{Avgränsningar}
 
-För att kunna hålla projektet inom tidsramen måste lämpliga avgränsningar i
-projektuppgiften göras. Till en början avgränsas arbetet till att behandla
-en AGV men detta skall dock inte begränsa det övergripande systemet, som
-bör konstrueras för att hantera fler AGV:er.
+För att kunna hålla projektet inom given tidsram måste lämpliga
+avgränsningar i projektuppgiften göras. Till en början avgränsas arbetet
+till att behandla en AGV men detta skall dock inte begränsa det överordnade
+systemet, som bör konstrueras för att hantera fler AGV:er.
 
 På liknande sätt kommer gruppen att utforma lagermiljön så att den
-innehåller endast en operatör även om det övergripande systemet skall kunna
+innehåller endast en operatör även om det överordnade systemet skall kunna
 hantera flera operatörer. Detta för att spara tid samt minimera och
 fokusera uppgiften på att först få den huvudsakliga funktionen, hämta och
 lämna lagerinredning, att fungera korrekt. Här avgränsar gruppen sig till
@@ -147,47 +148,70 @@ ordnas så att det ej existerar hinder på höjder som inte kan detekteras
 
 Två stora områden som gruppen väljer att avgränsa sig emot är felplacering
 av lagerinredning samt lagersaldohållning. Felplacering av lagerinredning
-innebär alltså att lagerinredningen förflyttas manuellt så att systemet
-tappar kontrollen på var de befinner sig i lokalen. Gruppen förutsätter här
-att all personal är väl införstådd med systembegränsningen. Gällande
-lagersaldohållningen är det troligt att det redan finns en extern
+innebär alltså att lagerinredningen förflyttas manuellt vilket gör att
+systemet tappar kontrollen på var de befinner sig i lokalen. Gruppen
+förutsätter här att all personal är väl införstådd med systembegränsningen.
+Gällande lagersaldohållningen är det troligt att det redan finns en extern
 saldohållningsfunktion hos företag som kan tänkas använda den framtagna
 AGV:n vilket gör utvecklandet av en sådan funktion överflödig och
 tidsödande.
 
-Gruppen väljer vidare att avgränsa sig till navigering via QR-koder och
-kommer således inte utveckla tidigare års positioneringssystem med hjälp av
-laser. Detta eftersom gruppen funnit stora brister i denna metod och en
-liten potential vid eventuell utvidgning av systemet vid granskning av det
-arbete som tidigare gjorts med AGV:erna. Användadet av QR-koder som
-navigationsmedel motiveras genom att det finns tidigare arbete kring
-metoden tillgänglig, kunniga personer har gett rekommendationer för metoden
-samt att tekniken är väl beprövad. [REFERENS se KIVA-systemsisch]
+Gruppen överväger i dagsläget att avgränsa sig till navigering via QR-koder
+efter en snabbare genomgång av föregående års rapporter. Detta då gruppen
+funnit brister i användning av lasernavigering och en låg potential vid
+eventuell utvidgning av systemet vid granskning av det arbete som tidigare
+gjorts med AGV:erna. Detta ska dock utredas mer ingående innan beslut
+fattas \cite{kivasystems}.
 
-\section{Metod/Genomförande}
-Nedan följer en kort beskrivning av arbetets planerade arbetsgång. 
+\section{Genomförande}
+Projektet var från den uppdragsgivande institutionen avsett att bygga
+vidare på tidigare års kandidatarbeten, dock påvisade dessa bristfälliga
+resultat och ytterligare frågetecken har framkommit vid en första
+granskning av arbetena \cite{laser,qr}. På grund av detta behöver gruppen
+ta ett beslut kring huruvida utveckling av ett nytt koncept bör ske
+alternativt fortsättning av något av ovan nämnda arbeten. Detta beslut är
+avgörande för hur projektet kommer att arta sig och hur långt gruppen
+kommer hinna. Nedan följer mer ingående hur gruppen avser att gå tillväga.
 
 \subsection{Förstudie}
 I och med att projektet syftar till att vidareutveckla befintliga
-kandidatarbeten avser gruppen att först kritiskt granska dessa för att
-bredda sin kunskap inom ämnet och sedan välja vilka delar av arbetet man
-vill gå vidare med. I de fall gruppen avser att använda sig av befintligt
-material förlitar gruppen sig på att lämpliga avväganden och studier
-genomförts.
+kandidatarbeten avser gruppen att först kritiskt granska dessa. Utöver
+detta bör gruppen även försöka införskaffa sig så mycket information som
+möjligt från institutionen på Chalmers och företag i branschen för att
+skapa sig en bild av vad som är realiserbar samt kommersiellt gångbart.
+
+Gruppen studerar kandidatarbetena först för att bredda sin kunskap inom
+ämnet och med förhoppning om att finna delar i arbetet man vill gå vidare
+med. I de fall gruppen avser att använda sig av befintligt material
+förlitar gruppen sig på att lämpliga avvägningar och studier genomförts,
+här är klart fördelaktigt om det inom tidigare projekt testats och
+realiserats. Ytterligare en faktor inför eventuella beslut kring
+vidareutveckling bör vara tillgången av det material gruppen avser att
+utveckla.
+
+\subsection{Konkretisering}
+I samband med förstudien bör gruppen på ett strukturerat sätt analysera
+problemet och finna de nyckelfunktioner som behöver lösas. Framtagning av
+kravspecifikation bör gruppen även göra i detta skede. För att få fram en
+kommersiellt gångbar lösning är det av vikt att gruppen tillsammans med
+tilltänkta brukare specificerar kraven. Samtliga krav skall här kopplas med
+en typ av verifiering och i största mån, ett kvantitativt mål.
 
 \subsection{Konceptlösning}
-I projektets första fas avser gruppen, förutom att konkretisiera problemet,
+I projektets första fas avser gruppen, förutom att konkretisera problemet,
 att även sammanställa en generell konceptlösning som löser problemen i
-största möjliga mån. För att kontrollera konceptens möjlighet till
-realisering bör en utvärdering göras via studier inom fackvetenskap och
-samtal med handledare och yrkesverksamma.
+största möjliga mån. Koncepten baseras på uppkommet stoff ur
+litteraturstudien, från samtal med fackmän och ingenjörsmässiga avväganden
+från gruppen. För att kontrollera konceptens möjlighet till realisering bör
+en utvärdering göras via samtal med handledare och yrkesverksamma.
+
 
 \subsection{Realisering}
-Vid ett godkänd koncept avser sedan gruppen att realisera detta med en
+Vid ett godkänt koncept avser sedan gruppen att realisera detta med en
 prototyp. Realiseringsarbetet kommer ske genom diverse ombyggnationer av
 den befintliga AGV:n. Då detta är ett konstruktionsarbete avser gruppen att
 flytande använda sig av de stöd som finns att tillgå; manualer, studie- och
-facklitteratur samt stöd från handledare och yrkeserksamma inom området.
+facklitteratur samt stöd från handledare och yrkesverksamma inom området.
 Detta för att kunna lösa problem i takt med att de uppkommer. Arbetsgången
 under realiseringen antas i flera anseenden vara iterativ. Gruppen avser
 att kontinuerligt testa och utvärdera konstruktionsarbetet och därmed
@@ -198,7 +222,10 @@ För att vid slutet av projektet kunna utvärdera hur väl uppsatta mål
 avklarats utformas vid ett tidigt stadie ett helhetstest som syftar att
 kontrollera samtliga funktioner hos systemet. Testet bör i största mån
 efterlikna den miljö som AGV:n är tänkt att verka i och uppgifterna likaså.
-Detta funktionstest avser att avgöra om projektet är lyckat eller inte.
+I de fall som kraven på funktionen i kravspecifikationen är av kvantitativa
+mått kan ett avskärmat test genomföras. Detta funktionstest avser att
+avgöra om projektet är lyckat eller inte. I det stora hela anses skall
+helhetsfunktionen vara avgörande vid utvärdering.
 
 \subsection{Redovisning}
 Arbetet som gruppen utför kommer att redovisas i dels två olika muntliga
@@ -208,15 +235,14 @@ demonstreras.
 
 
 
-
 \section{Tidsplan}
 För att få en överskådlig bild av projektets olika delmoment och
-inlämningar uppförs en tabell~\ref{tab:planeringstabell} innehållandes de
-moment som det finns fasta datum för samt ett ganttschema~\ref{fig:gantt}
-med en planering för arbetsgången. Planeringen av arbetsgången är gjord
-utifrån grova uppskattningar utifrån hur lång tid de olika delar kommer att
-ta och genom att uppföra gantschemat fås en tydlig bild av att arbetet med
-olika delar sker parallellt. 
+inlämningar uppförs en tabell (se tabell~\ref{tab:planeringstabell})
+innehållandes de moment som det finns fasta datum för samt ett Ganttschema
+(se figur~\ref{fig:gantt}) med en planering för arbetsgången. Planeringen
+av arbetsgången är gjord utifrån grova uppskattningar med hänsyn till hur
+lång tid de olika delarna kommer att ta och genom att uppföra Ganttschemat
+fås en tydlig bild av att arbetet med olika delar sker parallellt.
 
 \begin{table}[h]
   \begin{center}
@@ -235,6 +261,8 @@ olika delar sker parallellt.
   \caption{Obligatoriska planerade moment.}
   \label{tab:planeringstabell}
 \end{table}
+
+\newpage
 
 \begin{figure}[h]
   \begin{ganttchart}[
@@ -277,6 +305,7 @@ olika delar sker parallellt.
   \label{fig:gantt}
 \end{figure}
 
+\newpage
 \printbibliography
 
 \end{document}
