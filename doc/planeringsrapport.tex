@@ -13,6 +13,7 @@
 \usepackage{biblatex}
 \usepackage{csquotes}
 \usepackage{pgfgantt}
+\usepackage[a4paper]{geometry}
 
 
 \addbibresource{references.bib}
@@ -264,6 +265,7 @@ fås en tydlig bild av att arbetet med olika delar sker parallellt.
 
 \newpage
 
+\newgeometry{left=1.8cm}
 \begin{figure}[h]
   \begin{ganttchart}[
     canvas/.style={draw=black!15},
@@ -304,6 +306,7 @@ fås en tydlig bild av att arbetet med olika delar sker parallellt.
   \caption{Ganttschema över tidsplaneringen.}
   \label{fig:gantt}
 \end{figure}
+\restoregeometry
 
 \newpage
 \printbibliography
