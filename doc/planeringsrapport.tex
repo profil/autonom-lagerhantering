@@ -28,41 +28,48 @@
 
 
 \section{Bakgrund}
-Den industriella revolutionen sträcker sig från tidigt 1700-tal till idag
-där människan har, i samklang med naturen och tekniska möjligheter,
-utvecklat och förbättrat tekniker i syfte att skapa robustare system med
-högre produktivitet. Allt från ''Spinning Jenny'' till James Watts ångmaskin
-har förenklat människans vardag och tillfälligt stillat den eviga strävan
-efter ständiga förbättringar som genomsyrar människans långa historia
-\cite{organisationochorganisering}.
+Att hushålla med resurser är en viktig del av företagande oavsett om det
+rör sig om pengar, ytor eller miljön. Inom tillverkningsindustrin, som har
+ett starkt fäste i Sverige, hålls det ofta stora lager vilket binder
+kapital och tar upp stor platsyta. Detta görs dels för att företag ska
+kunna hålla höga servicenivåer men även för att den ständigt föränderliga
+marknaden är svår att förutspå. Stora svenska företag arbetar ofta aktivt
+med att minska dessa kostnader genom att utarbeta effektiva
+logistiklösningar, exempelvis via ''Supply chain management'' \cite{log}.
+Problemet med detta är att man oftast behandlar in- och utflöden från lager
+och fabriker. Hänsyn tas således inte till de faktiska materialflödena inom
+lagret.
 
-Vad gäller effektiva materialflöden inom produktion tog Henry Ford det
-historiskt viktiga steget när han införde löpande-band-principen i sin
-bilfabrik, en förändring som kom att ligga till grund för de flesta mass-
-och serieproduktionssystem idag. Ford utmanade gängse normer genom
-banbrytande idéer för att vägleda monteringsobjekten genom fabriken förbi
-montörer och operatörer, så kallad linelayout. Senare vidareutvecklades
-drivning av linan till att bli helt automatiserad och därigenom mer
-resurseffektiv \cite{organisationochorganisering}.
-
-Ytterligare ett steg i utvecklingen är att tillåta en automatiserad
-materialförsörjning i allt från lagermiljöer till massproduktionslinor.
-Istället för en manuell materialhantering där lagerarbetare och truckförare
-rör sig genom lagermiljöer för att försörja monterings- eller
-packningsstationer med rätt material och produkter så automatiseras
-processen.
-
-Enligt Toyotas teorier om LEAN production är rörelser i ett system en av de
-\emph{7+1 slöserierna} och bör undvikas i största möjliga mån. Genom att
-automatisera materialförsörjningen minimeras de mänskliga rörelserna vilket
-medför att en större del av det mänskliga arbetet åtgår till värdeskapande
-aktiviteter \cite{organisationochorganisering}. Tidigare års
-kandidatarbeten som berör ämnet grundades på en AGV\footnote{Automated
-Guided Vehicle} som autonomt åker mellan lagerplatser och annan godtyckligt
-definierad position. Dessa arbeten ligger till grund för ett fortsatt
-arbete med projektet där fokus ligger på att använda den kunskap som
-förvärvats och utveckla den för att nå längre och uppnå bättre resultat.
+Oftast sker materialhanteringen i lagret manuellt med hjälpmedel som
+truckar, pallyftare och vagnar. Hos de företag som kommit längre i sin
+automatisering används ibland paternosterverk\footnote{Paternosterverk är
+en automatiserad lagerhylla.}, men dessa är ofta inte flexibla gällande nya
+lagerlösningar och är begränsade till små artiklar \cite{log}.
  
+Konsultbolaget Boston Consulting Group menar att det finns möjligheter att
+minska kostnaderna inom industrin med 16\% genom en ökning av
+automatiseringen under de kommande 10 åren \cite{bcg}. Med tanke på
+materialhanteringens stora manuella arbete finns det kostnadsminskningar
+att göra även här.
+ 
+En uppmärksammad automationslösning för lagerhantering har utvecklats av
+företaget Kiva Systems. Det baseras på ett integrerat system där
+operatörer, AGV:er\footnote{Automatic Guided Vehicle} och lagerhyllor
+samspelar. Kortfattat utgörs systemet av flexibla lagerplatser där ett
+överordnat system övervakar och håller koll på inventarier. Under systemet
+verkar individuella AGV:er med uppgift att transportera lagerhyllorna
+mellan operatörerna och lagerplatsen. Detta system möjliggör en flexiblare
+användning av lagerytorna då utrymmet lätt kan omorganiseras
+\cite{kivasystems}.Den största vinsten finns i kostnadsbesparingar och
+effektivitetshöjningar. Utöver detta förbättras även operatörernas
+arbetsbörda samtidigt som risken för personskador minskar \cite{truckar}. 
+
+Som grund för fortsatt arbete ligger tidigare års kandidatarbete där syftet
+var att automatiska AGV:er skulle transportera lagerinredning åt ett
+överordnat system \cite{qr,laser}. Tidsbrist har medfört att projekten inte
+nått önskat resultat och det är i ljuset av detta årets kandidatarbete tar
+vid för att utveckla och uppnå ett mer tillfredställande resultat. 
+
 
 \section{Syfte}
 Avsikten med projektet är att genom vidareutveckling av föregående års
@@ -78,17 +85,22 @@ ergonomin i anknytning till materialhantering i lagermiljöer.
 
 
 \section{Problem/Uppgift}
-Huvudproblemet grundas i att en AGV autonomt ska kunna navigera mellan
-kända positioner i en känd miljö, där den ska ha möjlighet att utifrån ett
-överordnat system ta order och genomföra leveranser. AGV:n ska även undvika
-kollision med fasta och rörliga objekt, samt vara utrustad med en anordning
-som möjliggör materialtransport. För att lösa dessa problem, delas systemet
-upp i följande delsystem:
+Avsikten med projektet är att genom vidareutveckling av föregående års
+kandidatarbeten utarbeta och implementera en lösning för autonom
+materialhantering med hjälp av AGV:er. Med hjälp av ett överordnat system
+ska AGV:er koordineras till att transportera förutbestämd lagerinredning
+till bestämda platser för att till exempel en montör ska slippa hämta detta
+själv. Systemet ska vara möjligt att implementera i ett lagersystem med
+flera AGV:er och varje AGV utrustas med ett kollisionssystem för att
+undvika hinder. Målet är att öka effektiviteten och på ett effektivt och
+tillförlitligt sätt minimera kostnader samt reducera personskador och höja
+ergonomin i anknytning till materialhantering i lagermiljöer. 
 
+\newpage
 \begin{enumerate}
   \item Lagerinredningen skall vara utformad så att
   \begin{enumerate}
-    \item Den på ett säkert sätt skall kunna transporteras med AGV:n
+    \item Den skall kunna transporteras av AGV:n utan att varor går sönder
   \end{enumerate}
 
   \item Plockstationen skall
@@ -101,7 +113,7 @@ upp i följande delsystem:
   \item Navigationssystem skall
   \begin{enumerate}
     \item Möjliggöra ett system i lagerlokalen som AGV:n kan navigera efter
-	\item Vara kommersiellt gångbart
+	\item Vara grund till ett kommersiellt gångbart system
   \end{enumerate}
 
   \item AGV:n skall
@@ -124,99 +136,134 @@ upp i följande delsystem:
   \end{enumerate}
 \end{enumerate}
 
+Det är svårt att uppskatta vilka delar som kommer kräva störst arbetsinsats
+och vilka som kommer kräva mest tid men föregående kandidatarbeten ger en
+fingervisning om var tidskrävande problem kan uppstå. Fingervisningen tyder
+på att navigationssystemet och det överordnade systemet är tunga, och för
+helheten viktiga, delar av arbetet vilket troligen leder till att mycket
+tid kommer läggas på dessa bitar. Eftersom det dock finns tillgång till
+tidigare arbeten bör utvecklingen av ovanstående system underlättas något,
+till skillnad från utvecklandet av ett lämpligt gränssnitt för användning
+av AGV:n som inte skapats tidigare. 
+
+Att tidsuppskatta skapandet av ett gränssnitt är komplicerat eftersom det
+inte finns någon kunskap att tillgå kring dess omfattning vilket innebär en
+risk att det kan visa sig vara problematiskt att genomföra. Troligtvis
+kommer det att vara svårt att finna vetenskaplig fakta som fullt stödjer
+besluten och i många fall kommer troligtvis stor vikt ligga på samtal med
+handledare och fackmän. Att ständigt behöva vända sig till andra personer
+för faktasökning är något som kan bli både tidskrävande och problematiskt.
+
+Utöver detta är det en utmaning att finna ett koncept som passar. Det finns
+i dagsläget många olika sorters lager och en automationslösning kan vara
+svår att anpassa till flera olika system. Tekniska problem kommer att
+uppstå oavsett lösning, men om lösningen är för avgränsad kommer det vara
+svårt att implementera på riktiga lagersystem. Detta är särskilt
+problematiskt då det kommer innefatta en avvägning om det framarbetade
+konceptet är tillräckligt brett för att kunna ligga till grund för ett
+neutralt, och för ett godtyckligt lagersystem, fungerade koncept.
+
+Design av anordning för transport av lagerhylla beräknas inte vara lika
+tidskrävande och svår i jämförelse med navigationssystemet och det
+överordnade systemet, främst med tanke på den kompetens som finns att
+tillgå men också tillgången till de lösningsförslag från tidigare års
+kandidatarbeten.
+
+Alternativa navigationssystem granskas eftersom det uppdagats brister i
+användningen av lasernavigation till det givna problemet, baserat på en
+undersökning av arbeten som tidigare gjorts med AGV:erna. Exempelvis är
+lasersystemet känsligt för de många störningar som uppkommer vid
+arbetshöjden, bland annat att människor och hyllben blockerar
+reflektionspunkterna och därmed dess lokaliseringsförmåga vilket omöjliggör
+en högeffektiv transport \cite{laser}. Dessa problem skapar incitament för
+en utvärdering av alternativa koncept vad gäller navigationen av AGV:n.
 
 
 \section{Avgränsningar}
-
 För att kunna hålla projektet inom given tidsram måste lämpliga
 avgränsningar i projektuppgiften göras. Till en början avgränsas arbetet
-till att behandla en AGV men detta skall dock inte begränsa det överordnade
-systemet, som bör konstrueras för att hantera fler AGV:er.
+till att enbart behandla en AGV. Detta skall dock inte begränsa det
+överordnade systemet, som bör konstrueras för att hantera fler AGV:er. 
 
-På liknande sätt kommer gruppen att utforma lagermiljön så att den
-innehåller endast en operatör även om det överordnade systemet skall kunna
-hantera flera operatörer. Detta för att spara tid samt minimera och
-fokusera uppgiften på att först få den huvudsakliga funktionen, hämta och
-lämna lagerinredning, att fungera korrekt. Här avgränsar gruppen sig till
-att fortsätta med föregående års tanke med att lagerinredningen skall ha en
-förutbestämd struktur och design.
+På liknande sätt kommer lagermiljön utformas så att den endast innehåller
+en operatör. Detta för att spara tid samt minimera och fokusera uppgiften
+på att först få den huvudsakliga funktionen, hämta och lämna
+lagerinredning, att fungera korrekt. Här beslutas det att fortsätta med
+föregående års tanke med att lagerinredningen skall ha en förutbestämd
+struktur och design.
 
-En annan begränsning är självfallet att projektet måste utföras med
-tillgänglig hårdvara och budget. Gruppen kommer även endast arbeta med en,
-för det överordnade systemet, känd miljö för att kunna optimera
-ruttplaneringen. Miljön avgränsas till att verka i enbart ett plan och
-ordnas så att det ej existerar hinder på höjder som inte kan detekteras
+För att optimera ruttplaneringen antas den tillgängliga arbetsmiljön vara
+känd för det överordnade systemet. Miljön avgränsas också till att verka i
+enbart ett plan och ordnas så att det ej existerar hinder på höjder som
+inte kan detekteras eftersom det inte tillhör det primära problemet.
 
-Två stora områden som gruppen väljer att avgränsa sig emot är felplacering
-av lagerinredning samt lagersaldohållning. Felplacering av lagerinredning
+Två stora områden som projektet avgränsas emot är felplacering av
+lagerinredning samt lagersaldohållning. Felplacering av lagerinredning
 innebär alltså att lagerinredningen förflyttas manuellt vilket gör att
-systemet tappar kontrollen på var de befinner sig i lokalen. Gruppen
-förutsätter här att all personal är väl införstådd med systembegränsningen.
-Gällande lagersaldohållningen är det troligt att det redan finns en extern
+systemet tappar kontrollen på var de befinner sig i lokalen. Det förutsätts
+här att all personal är väl införstådd med systembegränsningen. Gällande
+lagersaldohållningen är det troligt att det redan finns en extern
 saldohållningsfunktion hos företag som kan tänkas använda den framtagna
 AGV:n vilket gör utvecklandet av en sådan funktion överflödig och
 tidsödande.
 
-Gruppen överväger i dagsläget att avgränsa sig till navigering via QR-koder
-efter en snabbare genomgång av föregående års rapporter. Detta då gruppen
-funnit brister i användning av lasernavigering och en låg potential vid
-eventuell utvidgning av systemet vid granskning av det arbete som tidigare
-gjorts med AGV:erna. Detta ska dock utredas mer ingående innan beslut
-fattas \cite{kivasystems}.
+
 
 \section{Genomförande}
 Projektet var från den uppdragsgivande institutionen avsett att bygga
 vidare på tidigare års kandidatarbeten, dock påvisade dessa bristfälliga
 resultat och ytterligare frågetecken har framkommit vid en första
-granskning av arbetena \cite{laser,qr}. På grund av detta behöver gruppen
-ta ett beslut kring huruvida utveckling av ett nytt koncept bör ske
-alternativt fortsättning av något av ovan nämnda arbeten. Detta beslut är
-avgörande för hur projektet kommer att arta sig och hur långt gruppen
-kommer hinna. Nedan följer mer ingående hur gruppen avser att gå tillväga.
+granskning av arbetena\cite{laser,qr}. På grund av detta behövs ett beslut
+fattas kring huruvida utveckling av ett nytt koncept bör ske alternativt
+fortsättning av något av ovan nämnda arbeten. Detta beslut är avgörande för
+hur projektet kommer att arta sig och hur många delmål som kommer hinna
+uppfyllas. Nedan följer mer ingående hur projektet kommer gå tillväga.
+
 
 \subsection{Förstudie}
 I och med att projektet syftar till att vidareutveckla befintliga
-kandidatarbeten avser gruppen att först kritiskt granska dessa. Utöver
-detta bör gruppen även försöka införskaffa sig så mycket information som
-möjligt från institutionen på Chalmers och företag i branschen för att
-skapa sig en bild av vad som är realiserbar samt kommersiellt gångbart.
+kandidatarbeten avses att först kritiskt granska dessa. Utöver detta bör så
+mycket information som möjligt införskaffas från institutionen på Chalmers
+och företag i branschen för att skapa sig en bild av vad som är
+realiserbart.
 
-Gruppen studerar kandidatarbetena först för att bredda sin kunskap inom
-ämnet och med förhoppning om att finna delar i arbetet man vill gå vidare
-med. I de fall gruppen avser att använda sig av befintligt material
-förlitar gruppen sig på att lämpliga avvägningar och studier genomförts,
-här är klart fördelaktigt om det inom tidigare projekt testats och
-realiserats. Ytterligare en faktor inför eventuella beslut kring
-vidareutveckling bör vara tillgången av det material gruppen avser att
-utveckla.
+De tidigare kandidatarbetena studeras för att bredda kunskapen inom ämnet
+för att finna delar värda att ta till vara och arbeta vidare med. I de fall
+befintligt material används antages att lämpliga avvägningar och studier
+genomförts, här är det klart fördelaktigt om det inom tidigare projekt
+testats och realiserats. Ytterligare en faktor inför eventuella beslut
+kring vidareutveckling bör vara tillgången av det material som avses
+utvecklas.
+
 
 \subsection{Konkretisering}
-I samband med förstudien bör gruppen på ett strukturerat sätt analysera
-problemet och finna de nyckelfunktioner som behöver lösas. Framtagning av
-kravspecifikation bör gruppen även göra i detta skede. För att få fram en
-kommersiellt gångbar lösning är det av vikt att gruppen tillsammans med
-tilltänkta brukare specificerar kraven. Samtliga krav skall här kopplas med
-en typ av verifiering och i största mån, ett kvantitativt mål.
+I samband med förstudien bör problemet analyseras på ett strukturerat sätt
+för att på så vis finna de nyckelfunktioner som behöver lösas. Framtagning
+av kravspecifikation bör även göras i detta skede. Samtliga krav skall här
+kopplas med en typ av verifiering och i största mån, ett kvantitativt mål.
+
+
 
 \subsection{Konceptlösning}
-I projektets första fas avser gruppen, förutom att konkretisera problemet,
-att även sammanställa en generell konceptlösning som löser problemen i
-största möjliga mån. Koncepten baseras på uppkommet stoff ur
-litteraturstudien, från samtal med fackmän och ingenjörsmässiga avväganden
-från gruppen. För att kontrollera konceptens möjlighet till realisering bör
-en utvärdering göras via samtal med handledare och yrkesverksamma.
+I projektets första fas avses, förutom att konkretisera problemet, att även
+sammanställa en generell konceptlösning som löser problemen i största
+möjliga mån. Koncepten baseras på litteraturstudien, samtal med fackmän och
+ingenjörsmässiga avväganden. För att kontrollera konceptens möjlighet till
+realisering bör en utvärdering göras via samtal med handledare och
+yrkesverksamma.
 
 
 \subsection{Realisering}
-Vid ett godkänt koncept avser sedan gruppen att realisera detta med en
-prototyp. Realiseringsarbetet kommer ske genom diverse ombyggnationer av
-den befintliga AGV:n. Då detta är ett konstruktionsarbete avser gruppen att
+Vid ett godkänt koncept avses en prototyp tas fram för att realisera
+projektet. Realiseringsarbetet kommer ske genom diverse ombyggnationer av
+den befintliga AGV:n. Då detta är ett konstruktionsarbete avses att
 flytande använda sig av de stöd som finns att tillgå; manualer, studie- och
 facklitteratur samt stöd från handledare och yrkesverksamma inom området.
 Detta för att kunna lösa problem i takt med att de uppkommer. Arbetsgången
-under realiseringen antas i flera anseenden vara iterativ. Gruppen avser
+under realiseringen antas i flera avseenden vara iterativ. Projektet avser
 att kontinuerligt testa och utvärdera konstruktionsarbetet och därmed
 kontinuerligt förändra och förbättra tills godkänt resultat uppnås.
+
 
 \subsection{Utvärdering}
 För att vid slutet av projektet kunna utvärdera hur väl uppsatta mål
@@ -225,25 +272,59 @@ kontrollera samtliga funktioner hos systemet. Testet bör i största mån
 efterlikna den miljö som AGV:n är tänkt att verka i och uppgifterna likaså.
 I de fall som kraven på funktionen i kravspecifikationen är av kvantitativa
 mått kan ett avskärmat test genomföras. Detta funktionstest avser att
-avgöra om projektet är lyckat eller inte. I det stora hela anses skall
+avgöra om projektet är lyckat eller inte. I det stora hela anses
 helhetsfunktionen vara avgörande vid utvärdering.
 
+
 \subsection{Redovisning}
-Arbetet som gruppen utför kommer att redovisas i dels två olika muntliga
+Arbetet som utförs kommer att redovisas i dels två olika muntliga
 presentationer men även en vetenskaplig rapport. Utöver detta skall också
 arbetet, som tidigare nämnts, mynna ut i en fungerande AGV som skall kunna
 demonstreras.
 
 
-
 \section{Tidsplan}
 För att få en överskådlig bild av projektets olika delmoment och
-inlämningar uppförs en tabell (se tabell~\ref{tab:planeringstabell})
-innehållandes de moment som det finns fasta datum för samt ett Ganttschema
-(se figur~\ref{fig:gantt}) med en planering för arbetsgången. Planeringen
-av arbetsgången är gjord utifrån grova uppskattningar med hänsyn till hur
-lång tid de olika delarna kommer att ta och genom att uppföra Ganttschemat
-fås en tydlig bild av att arbetet med olika delar sker parallellt.
+inlämningar har en tabell (se tabell~\ref{tab:planeringstabell}) uppförts,
+innehållande de moment som det finns fasta datum för, samt även ett
+Ganttschema (se figur~\ref{fig:gantt}) med en planering för arbetsgången.
+Planeringen av arbetsgången är gjord utifrån grova uppskattningar med
+hänsyn till hur svåra och därmed hur tidskrävande de olika delarna är. 
+
+En fördjupning i ämnet och analyser av tidigare års rapporter krävs för att
+kunna utveckla systemet inom den satta tidsramen. Det krävs även en
+genomgång av materialet så som hårdvara och mjukvara för att skaffa sig en
+bild av hur lösningar kan genomföras rent praktiskt.
+
+För att arbeta kontinuerligt med projektets olika delar som skall
+integreras (navigationssystem, kollisionssystem etcetera) kommer
+utvecklandet av dessa delsystem ske parallellt vilket syns tydligt i
+Ganttschemat. Skälet till att jobba med de olika delarna samtidigt är för
+att effektivisera utvecklandet och ha en löpande feedback om delarna för
+att underlätta integrering så att inte en funktion förutsätts i ett annat
+delsystem som sedan ej går att realisera.
+
+Navigationssystemet ses som den mest tidskrävande delen då tidigare
+rapporter visar på att komplexiteten hos problemet samt på de tekniska
+instrumenten är väldigt hög. Utvecklingen av ett gränssnitt är en mer
+tidsmässigt svåruppskattad del eftersom det inte finns tidigare arbeten
+inom ämnet att tillgå samt att komplexiteten är okänd. Ytterligare en stor
+del i arbetet är utvecklingen av det överordnade systemet, då de viktigaste
+funktionerna (exkluderat navigationssystemet) kommer behandlas där. 
+
+Ett autonomt lagersystem är inte komplett utan ett fungerade
+kollisionssystem samt en förmåga att kunna transportera lagerinredning.
+Enligt tidigare arbeten så visar det sig att kollisionssystemet är
+krångligt och tar mycket tid, \cite{laser,qr}. Framtagande av en anordning
+som möjliggör transporten av lagerhyllan förmodas även det vara en
+omfattande del men ta mindre tid i anspråk i jämförelse med bland annat
+navigationssystemet.
+
+Slutrapporten kommer vara ett kontinuerligt arbete under hela tidsspannet
+för att underlätta rapportering och dokumentering av vad som gjorts samt
+vilka resultat som har tagits fram.
+
+
 
 \begin{table}[h]
   \begin{center}
