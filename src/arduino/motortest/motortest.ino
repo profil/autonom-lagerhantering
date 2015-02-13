@@ -1,4 +1,4 @@
-// Motor 1, M1 på arduino
+// Motor 1, M1 på arduino Test
 int dir1 = 2;
 int pwm1 = 3;
 
