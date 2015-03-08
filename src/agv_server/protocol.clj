@@ -25,19 +25,16 @@
 (defn handler
   [s info]
   (let [session (atom {})]
-    (s/on-closed s #(some-> (:client @session) (st/remove-client)))
     (swap! session assoc :pong true)
+    (s/on-closed s #(some-> (:client @session) (st/remove-client)))
     (s/connect (s/map #(protocol-handler % session) s) s)
-    (d/loop []
-      (Thread/sleep 5000)
-      (if (:pong @session)
-        (do 
-          @(s/put! s "PING")
-          (swap! session assoc :pong false)
-          (d/recur))
-        ; PING TIMEOUT
-        (do
-          @(s/put! s "ERROR Ping timeout")
-          (prn "Ping timeout " info)
-          (s/close! s))))))
+    (s/connect (s/periodically 5000 5000
+      #(when-not (s/closed? s)
+          (if (:pong @session)
+            (do
+              (swap! session assoc :pong false)
+              (str "PING"))
+            (do
+              (s/close! s)
+              (println "Ping timeout" @session))))) s)))
 
