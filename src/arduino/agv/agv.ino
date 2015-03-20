@@ -92,33 +92,27 @@ void processCommand() {
     Omni.setCarStop(10);
     printCom("STOP");
     
-  }else if(!strncmp(buffer,"NORTH",5)){
-    Omni.setCarMove(speedMMPS,0,0);
-    printCom("NORTH");
-     
-  }else if(!strncmp(buffer,"SOUTH",5)){
-     printCom("SOUTH");
-     
-  }else if(!strncmp(buffer,"WEST",5)){
-    Omni.setCarLeft(speedMMPS);
-     printCom("WEST");
-     
-  }else if(!strncmp(buffer,"EAST",5)){
-    Omni.setCarRight(speedMMPS);
-     printCom("EAST");
-     
-  }else if(!strncmp(buffer,"LIFT",5)){
-     printCom("LIFT");
-     
-  }else if(!strncmp(buffer,"LOWER",5)){
-     printCom("LOWER");
-     
   }else if(!strncmp(buffer,"PAUSE",5)){
      printCom("PAUSE");
     
+  }else if(!strncmp(buffer,"FORWARD",5)){
+    Omni.setCarMove(speedMMPS,0,0);
+    printCom("FORWARD");
+     
+  }else if(!strncmp(buffer,"BACKWARD",5)){
+     printCom("BACKWARD");
+     
+  }else if(!strncmp(buffer,"LEFT",5)){
+    Omni.setCarLeft(speedMMPS);
+     printCom("LEFT");
+     
+  }else if(!strncmp(buffer,"RIGHT",5)){
+    Omni.setCarRight(speedMMPS);
+     printCom("RIGHT");
+     
   }else if(!strncmp(buffer,"ROTATE",6)){
      char *state = strchr(buffer,' ')+1;
-     int angle = atoi(state);
+     float angle = atof(state);
      printCom("ROTATE");
      printCom(angle);
      Omni.setCarRotate(angle);
@@ -127,6 +121,13 @@ void processCommand() {
      }else{
        Omni.setCarRotateRight(speedMMPS);
      }
+     
+  }else if(!strncmp(buffer,"LIFT",5)){
+     printCom("LIFT");
+     
+  }else if(!strncmp(buffer,"LOWER",5)){
+     printCom("LOWER");
+     
   }
 
   /*else if(!strncmp(buffer,"test",4)) {
