@@ -24,16 +24,21 @@
 
 (defn handler
   [s info]
-  (let [session (atom {})]
+  (let [session (atom {:stream s})]
     ;; Remove client when disconnected
     (s/on-closed s #(some-> (:client @session) (st/remove-client)))
 
     ;; Here is where the work is done
-    (s/connect (s/map #(protocol-handler % session) s) s)
+    (s/connect-via s
+      (fn [msg]
+        (if-let [result (protocol-handler msg session)]
+          (s/put! s result)
+          (d/future true)))
+      s)
 
     ;; Ping/Pong message handler
     (swap! session assoc :pong true)
-    (s/connect (s/periodically 5000 5000
+    (s/connect (s/periodically 25000 25000
       #(when-not (s/closed? s)
           (if (:pong @session)
             (do

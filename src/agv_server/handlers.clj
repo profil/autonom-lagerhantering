@@ -2,26 +2,37 @@
   (:require [agv-server.state :as st]
             [manifold.stream :as s]))
 
-(defn valid-session?
-  [session]
-  (:client session))
+
+(defmacro with-session
+  [session & body]
+  `(if-let [c# (:client ~session)]
+     (do ~@body)
+     (str "ERROR Not authenticated")))
 
 (defn login-handler
   [[client & params] session]
   (if (:client @session)
     (str "ERROR You are already authenticated")
-    (if-let [status (st/add-client client)]
+    (if-let [status (st/add-client client (:stream @session))]
       (do (swap! session assoc :client client)
           (str "OK"))
       (str "ERROR Client already exist"))))
 
 (defn pong-handler
   [session]
-  (if (valid-session? @session)
-    (do
-      (swap! session assoc :pong true)
-      (str "OK"))
-    (str "ERROR Not authenticated")))
+  (with-session @session
+    (swap! session assoc :pong true)
+    (str "OK")))
+
+(defn ready-handler
+  [[coords & params] session]
+  (with-session @session
+    (st/set-client-ready (:client @session))
+    (str "OK")))
+
+(defn ok-handler
+  [session]
+  (with-session @session nil))
 
 (defn err-handler
   [command params session]
@@ -33,4 +44,6 @@
     (case command
       "LOGIN" (login-handler params session)
       "PONG" (pong-handler session)
+      "READY" (ready-handler params session)
+      "OK" (ok-handler session)
       (err-handler command params session))))
