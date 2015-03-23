@@ -4,7 +4,7 @@
             [manifold.deferred :as d]
             [gloss.core :as g :refer [defcodec]]
             [gloss.io :as io]
-            [agv-server.handlers :refer [protocol-handler]]
+            [agv-server.handlers :refer [protocol-handler disconnect-handler]]
             [agv-server.state :as st]))
 
 (defcodec protocol (g/string :utf-8 :delimiters ["\r\n"]))
@@ -26,7 +26,7 @@
   [s info]
   (let [session (atom {:stream s})]
     ;; Remove client when disconnected
-    (s/on-closed s #(some-> (:client @session) (st/remove-client)))
+    (s/on-closed s #(disconnect-handler (:client @session)))
 
     ;; Here is where the work is done
     (s/connect-via s

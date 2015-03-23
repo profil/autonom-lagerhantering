@@ -1,16 +1,17 @@
 (ns agv-server.state)
 
-(def state (atom {}))
+(def state (agent {}))
+(def users (agent {}))
 
 (defn add-client
   [client stream]
   (if-not (contains? @state client)
-    (swap! state assoc client {:stream stream})))
+    (send state assoc client {:stream stream})))
 
 (defn remove-client
   [client]
   (if (contains? @state client)
-    (swap! state dissoc client)))
+    (send state dissoc client)))
 
 (defn get-client
   [client]
@@ -25,4 +26,14 @@
 
 (defn set-client-ready
   [client]
-  (swap! state assoc-in [client :ready] true))
+  (send state assoc-in [client :ready] true))
+
+
+(defn add-user
+  [user stream]
+  (send users assoc user {:stream stream}))
+
+(defn remove-user
+  [user]
+  (send users dissoc user))
+
