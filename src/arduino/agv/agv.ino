@@ -65,9 +65,68 @@ char test_on=0;  // only used in processCommand as an example.
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
-int speedMMPS = 100;
+unsigned int speedMMPS1 = 100;
+int uptime = 300;
+int duration = 100;
+//------------------------------------------------------------------------------
+//AGV methods
+//------------------------------------------------------------------------------
+void goAhead(unsigned int speedMMPS){ // Car moves advance
+  if(Omni.getCarStat()!=Omni4WD::STAT_ADVANCE) 
+    Omni.setCarSlow2Stop(300);
+  Omni.setCarAdvance(0); // If the car’s state is not advance.stop it
+// else moves advance continue
+  Omni.setCarSpeedMMPS(speedMMPS, 300); // Set the car speed at 300
+  //Omni.delayMS(5000,false);
+  
+}
 
+void goBack(unsigned int speedMMPS){ // Car moves advance
+  if(Omni.getCarStat()!=Omni4WD::STAT_BACKOFF) 
+    Omni.setCarSlow2Stop(300);
+  Omni.setCarBackoff(0); // If the car’s state is not advance.stop it
+// else moves advance continue
+  Omni.setCarSpeedMMPS(speedMMPS, 300); // Set the car speed at 300
+  Omni.delayMS(5000,false);
+}
 
+void turnLeft(unsigned int speedMMPS){
+  if(Omni.getCarStat()!=Omni4WD::STAT_LEFT) 
+    Omni.setCarSlow2Stop(300);
+  Omni.setCarLeft(0);
+  Omni.setCarSpeedMMPS(speedMMPS, 300);
+  Omni.delayMS(10);
+}
+
+void turnRight(unsigned int speedMMPS){
+  if(Omni.getCarStat()!=Omni4WD::STAT_RIGHT) 
+    Omni.setCarSlow2Stop(300);
+  Omni.setCarRight(0);
+  Omni.setCarSpeedMMPS(speedMMPS, 300);
+  Omni.delayMS(10);
+}
+void rotateRight(unsigned int speedMMPS){
+  if(Omni.getCarStat()!=Omni4WD::STAT_ROTATERIGHT) 
+    Omni.setCarSlow2Stop(300);
+  Omni.setCarRotateRight(0);
+  Omni.setCarSpeedMMPS(speedMMPS, 300);
+  Omni.delayMS(10);
+}
+
+void rotateLeft(unsigned int speedMMPS){
+  if(Omni.getCarStat()!=Omni4WD::STAT_ROTATELEFT) 
+    Omni.setCarSlow2Stop(300);
+  Omni.setCarRotateLeft(0);
+  Omni.setCarSpeedMMPS(speedMMPS, 300);
+  Omni.delayMS(10);
+}
+
+void allStop(unsigned int speedMMPS){
+  if(Omni.getCarStat()!=Omni4WD::STAT_STOP) 
+    Omni.setCarSlow2Stop(300);
+  Omni.setCarStop();
+  Omni.delayMS(100);
+}
 //------------------------------------------------------------------------------
 // methods
 //------------------------------------------------------------------------------
@@ -88,46 +147,85 @@ void done(){
 
 //------------------------------------------------------------------------------
 void processCommand() {
-  if(!strncmp(buffer,"STOP",5)){
-    Omni.setCarStop(10);
+  if(!strncmp(buffer,"STOP",4)){
+    allStop(speedMMPS1);
+//    Omni.setCarSlow2Stop(uptime);
+//    Omni.setCarStop();
+//    Omni.delayMS(duration);
+//    Omni.switchMotors();
+//    printCom("backoff");
+    /*analogWrite(A0,0);
+    analogWrite(A1,255);
+    analogWrite(A2,0);
     printCom("STOP");
     
-  }else if(!strncmp(buffer,"PAUSE",5)){
-     printCom("PAUSE");
+    //printCom("STOP");
+    */
     
-  }else if(!strncmp(buffer,"FORWARD",5)){
-    Omni.setCarMove(speedMMPS,0,0);
+  }else if(!strncmp(buffer,"TEST",4)){
+    Omni.demoActions(200,5000,500,false);
+    printCom("TEST");
+    /*analogWrite(A0, 255);
+    analogWrite(A1,0);
     printCom("FORWARD");
+    //printCom("FORWARD");
+     */
+  }else if(!strncmp(buffer,"FORWARD",7)){
+    goAhead(speedMMPS1);
+    
+    //Omni.demoActions(200,5000,500,false);
+    printCom("goAhead");
+    /*analogWrite(A0, 255);
+    analogWrite(A1,0);
+    printCom("FORWARD");
+    //printCom("FORWARD");
+     */
+  }else if(!strncmp(buffer,"BACKWARD",8)){
+    goBack(speedMMPS1);
+    printCom("BACKWARD");
      
-  }else if(!strncmp(buffer,"BACKWARD",5)){
-     printCom("BACKWARD");
-     
-  }else if(!strncmp(buffer,"LEFT",5)){
-    Omni.setCarLeft(speedMMPS);
-     printCom("LEFT");
+  }else if(!strncmp(buffer,"LEFT",4)){
+    turnLeft(speedMMPS1);
+    printCom("LEFT");
      
   }else if(!strncmp(buffer,"RIGHT",5)){
-    Omni.setCarRight(speedMMPS);
-     printCom("RIGHT");
+    turnRight(speedMMPS1);
+    printCom("RIGHT");
      
   }else if(!strncmp(buffer,"ROTATE",6)){
      char *state = strchr(buffer,' ')+1;
      float angle = atof(state);
      printCom("ROTATE");
      printCom(angle);
-     Omni.setCarRotate(angle);
      if(angle<0){
-       Omni.setCarRotateLeft(speedMMPS);
+      rotateLeft(speedMMPS1);
      }else{
-       Omni.setCarRotateRight(speedMMPS);
+      rotateRight(speedMMPS1);
+       
      }
      
+  }else if(!strncmp(buffer,"SETSPEED",8)){
+     char *state = strchr(buffer,' ')+1;
+     speedMMPS1 = atoi(state);
+     printCom("SETSPEED");
+     printCom(speedMMPS1);
+
+     
+  }else if(!strncmp(buffer,"GETSTATE",8)){
+    printCom(Omni.getCarStat());
+     
+  }else if(!strncmp(buffer,"GETSPEED",8)){
+    printCom(speedMMPS1);
+    printCom(Omni.getCarSpeedMMPS());
+     
   }else if(!strncmp(buffer,"LIFT",5)){
-     printCom("LIFT");
+    printCom("LIFT");
      
   }else if(!strncmp(buffer,"LOWER",5)){
      printCom("LOWER");
      
+  }else{
+    printCom("ERROR");
   }
 
   /*else if(!strncmp(buffer,"test",4)) {
@@ -157,10 +255,15 @@ void setup() {
 
   //Omni.demoActions(200, 5000, 500, false);
   Serial.begin(BAUD);
-  Serial.println("Init...");
-  Serial.println("Stretching...");
+  //Serial.println("Init...");
+  //Serial.println("Stretching...");
   sofar=0;
-  Serial.println("** AWAKE **");
+  //Serial.println("** AWAKE **");
+  
+  //Arduino Uno LED
+  //pinMode(A0, OUTPUT);
+  //pinMode(A1,OUTPUT);
+  //pinMode(A2,OUTPUT);
 }
 
 //------------------------------------------------------------------------------
@@ -172,6 +275,7 @@ void loop() {
   while(Serial.available() > 0) {
     buffer[sofar++]=Serial.read();
     if(buffer[sofar-1]==';') break;  // in case there are multiple instructions
+    //Omni.PIDRegulate();
   }
 
   // if we hit a semi-colon, assume end of instruction.
@@ -180,7 +284,7 @@ void loop() {
     
     // echo confirmation
     buffer[sofar]=0;
-    Serial.println(buffer);
+    //Serial.println(buffer);
 
     // do something with the command
     processCommand();
@@ -190,9 +294,12 @@ void loop() {
     sofar=0;
     
     // echo completion
-    Serial.println("Done.");
+    
+    Serial.print("OK");
+    //Serial.flush();
+  //Omni.delayMS(100,false);
   }
-  
+  Omni.delayMS(100,false);
   /*
 	Omni.setCarLeft(0);
 	Omni.setCarSpeedMMPS(400,1000);
