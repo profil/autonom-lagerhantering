@@ -1,11 +1,18 @@
 (ns agv-server.handlers
   (:require [agv-server.state :as st]
             [aleph.http :as http]
-            [manifold.stream :as s]))
+            [manifold.stream :as s]
+            [clojure.edn :as edn]))
+
+
+(defn put-all-users
+  [msg]
+  (let [users (st/get-users)]
+    (doseq [user (vals users)]
+      (s/put! (:stream user) (str msg)))))
+
 
 ;; WebSocket!
-(def users (agent {}))
-
 (defn handle-direction
   [dir]
   (if-let [[client {stream :stream}] (st/get-any-client)]
@@ -17,18 +24,21 @@
   [req]
   (let [s @(http/websocket-connection req)
         user (get-in req [:headers "sec-websocket-key"])]
-    (s/put! s "HELLO!!")
     (st/add-user user s)
     (s/on-closed s #(st/remove-user user))
+    (doseq [agv (st/get-clients)]
+      (s/put! s (str [:connect (key agv)]))
+      (s/put! s (str [:move {:from nil :to (:ready (val agv)) :id (key agv)}])))
     (s/connect-via s
-      (fn [msg]
-        (case msg
-          "stop" (s/put! s (handle-direction "STOP"))
-          "north" (s/put! s (handle-direction "NORTH"))
-          "west" (s/put! s (handle-direction "WEST"))
-          "east" (s/put! s (handle-direction "EAST"))
-          "south" (s/put! s (handle-direction "SOUTH"))
-          (s/put! s (str "got unknown" msg))))
+      (fn [data]
+        (let [[event msg] (edn/read-string data)]
+          (case msg
+            "stop" (s/put! s (handle-direction "STOP"))
+            "north" (s/put! s (handle-direction "NORTH"))
+            "west" (s/put! s (handle-direction "WEST"))
+            "east" (s/put! s (handle-direction "EAST"))
+            "south" (s/put! s (handle-direction "SOUTH"))
+            (s/put! s (str "got unknown" msg)))))
       s)))
 
 
@@ -37,22 +47,28 @@
 (defmacro with-session
   [session & body]
   `(if-let [c# (:client ~session)]
-     (do ~@body
-         (str "OK"))
+     (let [result# (do ~@body)]
+       (if (string? result#)
+         result#
+         (str "OK")))
      (str "ERROR Not authenticated")))
 
 (defn disconnect-handler
-  [client]
-  (st/remove-client client))
+  [session]
+  (when-let [client (:client @session)]
+    (put-all-users [:disconnect client])
+    (st/remove-client client)))
 
 (defn login-handler
   [[client & params] session]
-  (if (:client @session)
-    (str "ERROR You are already authenticated")
-    (if-let [status (st/add-client client (:stream @session))]
-      (do (swap! session assoc :client client)
-          (str "OK"))
-      (str "ERROR Client already exist"))))
+  (if (nil? client)
+    (str "ERROR Missing name")
+    (if (:client @session)
+      (str "ERROR You are already authenticated")
+      (if-let [status (st/add-client client (:stream @session))]
+        (do (swap! session assoc :client client)
+            (str "OK"))
+        (str "ERROR Client already exist")))))
 
 (defn pong-handler
   [session]
@@ -60,9 +76,15 @@
     (swap! session assoc :pong true)))
 
 (defn ready-handler
-  [[coords & params] session]
+  [[x y & params] session]
   (with-session @session
-    (st/set-client-ready (:client @session))))
+    (if (nil? y)
+      (str "ERROR No coordinates given")
+      (let [[from to] (st/set-client-ready
+                                (:client @session)
+                                [(edn/read-string y) (edn/read-string x)])]
+          (put-all-users [:connect (:client @session)])
+          (put-all-users [:move {:from from :to to :id (:client @session)}])))))
 
 (defn ok-handler
   [session]

@@ -26,7 +26,7 @@
   [s info]
   (let [session (atom {:stream s})]
     ;; Remove client when disconnected
-    (s/on-closed s #(disconnect-handler (:client @session)))
+    (s/on-closed s #(disconnect-handler session))
 
     ;; Here is where the work is done
     (s/connect-via s

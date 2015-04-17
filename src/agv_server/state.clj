@@ -17,6 +17,10 @@
   [client]
   (get @state client))
 
+(defn get-clients
+  []
+  @state)
+
 (defn get-any-client
   []
   (let [s @state
@@ -25,8 +29,10 @@
     (first r)))
 
 (defn set-client-ready
-  [client]
-  (send state assoc-in [client :ready] true))
+  [client coords]
+  (let [from (get-in @state [client :ready])]
+    (send state assoc-in [client :ready] coords)
+    [from coords]))
 
 
 (defn add-user
@@ -36,4 +42,8 @@
 (defn remove-user
   [user]
   (send users dissoc user))
+
+(defn get-users
+  []
+  @users)
 
