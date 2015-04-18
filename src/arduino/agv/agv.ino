@@ -7,7 +7,6 @@
 #include <PID_Beta6.h>
 #include <PinChangeInt.h>
 #include <PinChangeIntConfig.h>
-
 #include <AccelStepper.h>
 //------------------------------------------------------------------------------
 // RESET FUNCTION
@@ -19,7 +18,6 @@ void software_Reset(){
 // constants
 //------------------------------------------------------------------------------
 
-#define DELAY   (5)
 #define BAUD    (9600)
 #define MAX_BUF (64)
 
@@ -69,23 +67,22 @@ Omni4WD Omni(&wheel4, &wheel3, &wheel2, &wheel1);
 char buffer[MAX_BUF];
 int sofar;
 boolean stopp = false;
-char test_on=0;  // only used in processCommand as an example.
 
 //------------------------------------------------------------------------------
 // Stepper config
 //------------------------------------------------------------------------------
-int stepPin = 13;
-int dirPin = 6;
-int rev = 800;
-int liftPerRev = 4; //mm
-
 // ** Possible to change via labview
 int liftDist = 30; //mm
 // **
+int stepPin = 13;
+int dirPin = 6;
+int rev = 800;
 
+int liftPerRev = 4; //mm
 int steps = rev*(liftDist/liftPerRev);
 boolean lifted = false;
 
+// Stepper init
 AccelStepper stepper(1,stepPin,dirPin); 
 
 
@@ -110,35 +107,34 @@ int agvRotUptime = 50; // upTime during rotation
 //------------------------------------------------------------------------------
 //AGV methods
 //------------------------------------------------------------------------------
-void goAhead(unsigned int speedMMPS){ // Car moves advance
+void goForward(unsigned int speedMMPS){ // Car moves advance
   if(Omni.getCarStat()!=Omni4WD::STAT_ADVANCE) 
     Omni.setCarSlow2Stop(uptime);
-  Omni.setCarAdvance(0); // If the car’s state is not advance.stop it
-// else moves advance continue
-  Omni.setCarSpeedMMPS(speedMMPS, uptime); // Set the car speed at 300  
+  Omni.setCarAdvance(0); 
+  Omni.setCarSpeedMMPS(speedMMPS, uptime);
 }
 
 void goBack(unsigned int speedMMPS){ // Car moves advance
   if(Omni.getCarStat()!=Omni4WD::STAT_BACKOFF) 
     Omni.setCarSlow2Stop(uptime);
-  Omni.setCarBackoff(0); // If the car’s state is not advance.stop it
-// else moves advance continue
-  Omni.setCarSpeedMMPS(speedMMPS, uptime); // Set the car speed at 300
+  Omni.setCarBackoff(0); 
+  Omni.setCarSpeedMMPS(speedMMPS, uptime);
 }
 
-void turnLeft(unsigned int speedMMPS){
+void goLeft(unsigned int speedMMPS){
   if(Omni.getCarStat()!=Omni4WD::STAT_LEFT) 
     Omni.setCarSlow2Stop(uptime);
   Omni.setCarLeft(0);
   Omni.setCarSpeedMMPS(speedMMPS, uptime);
 }
 
-void turnRight(unsigned int speedMMPS){
+void goRight(unsigned int speedMMPS){
   if(Omni.getCarStat()!=Omni4WD::STAT_RIGHT) 
     Omni.setCarSlow2Stop(uptime);
   Omni.setCarRight(0);
   Omni.setCarSpeedMMPS(speedMMPS, uptime);
 }
+
 void rotateRight(unsigned int speedMMPS){
   if(Omni.getCarStat()!=Omni4WD::STAT_ROTATERIGHT) 
     Omni.setCarSlow2Stop(uptime);
@@ -153,30 +149,31 @@ void rotateLeft(unsigned int speedMMPS){
   Omni.setCarSpeedMMPS(speedMMPS, uptime);
 }
 
-//PI = 3.14159265359
-//2PI = 6.28318530718
-//PI/2 = 1.57079632679
-//PI/4 = 0.78539816339
+/* 
+  PI = 3.14159265359
+  2PI = 6.28318530718
+  PI/2 = 1.57079632679
+  PI/4 = 0.78539816339
+*/
 
-// Car rotate given angle
+// Car rotate given angle, +clockwise -counterclockwise [rad]
 void rotateAngle(float angle){
   int dt = 0;
-  
     if(angle<0){
       if(Omni.getCarStat()!=Omni4WD::STAT_ROTATELEFT) 
         Omni.setCarSlow2Stop(uptime);
       Omni.setCarRotateLeft(0);
     }else{
-      if(Omni.getCarStat()!=Omni4WD::STAT_ROTATELEFT) 
+      if(Omni.getCarStat()!=Omni4WD::STAT_ROTATERIGHT) 
         Omni.setCarSlow2Stop(uptime);
       Omni.setCarRotateRight(0);
     }
-  //printCom(dt);
   dt = 1000*((agvRadius*abs(angle))/(agvRotSpeed));
   Omni.setCarSpeedMMPS(agvRotSpeed, agvRotUptime);
   Omni.delayMS(dt,false);
   rotStop(agvRotSpeed);
 }
+
 // Stop rotation, note agvRotUptime
 void rotStop(unsigned int speedMMPS){
   if(Omni.getCarStat()!=Omni4WD::STAT_STOP) 
@@ -184,25 +181,25 @@ void rotStop(unsigned int speedMMPS){
   Omni.setCarStop();
 }
 
-// Car move forward Backward distance
+// Car move +forward -backward [mm]
 void moveDistanceFB(float dist){
   int dt = 0;
   if(dist<0){
-     if(Omni.getCarStat()!=Omni4WD::STAT_ADVANCE) 
+     if(Omni.getCarStat()!=Omni4WD::STAT_BACKOFF) 
        Omni.setCarSlow2Stop(uptime);
      Omni.setCarBackoff(0);
   }else{
-    if(Omni.getCarStat()!=Omni4WD::STAT_ROTATELEFT) 
+    if(Omni.getCarStat()!=Omni4WD::STAT_ADVANCE) 
       Omni.setCarSlow2Stop(uptime);
     Omni.setCarAdvance(0);
   }
   dt = (1000*abs(dist)/agvAdjSpeed) - agvAdjTime;
-  printComf(dt);  
   Omni.setCarSpeedMMPS(agvAdjSpeed, agvAdjTime);
   Omni.delayMS(dt,false);
   allStop(agvAdjTime);
 }
-// move distance right left
+
+// move distance +right -left [mm]
 void moveDistanceRL(float dist){
   int dt = 0;
   if(dist<0){
@@ -219,7 +216,8 @@ void moveDistanceRL(float dist){
   Omni.delayMS(dt,false);
   allStop(agvAdjTime);
 }
-// Car ADJUST rotate given angle
+
+// Car ADJUST rotate given angle, +clockwise -counterclockwise [rad]
 void adjRotateAngle(float angle){
   int dt = 0;
      if(angle<0){
@@ -227,11 +225,10 @@ void adjRotateAngle(float angle){
         Omni.setCarSlow2Stop(uptime);
       Omni.setCarRotateLeft(0);
     }else{
-      if(Omni.getCarStat()!=Omni4WD::STAT_ROTATELEFT) 
+      if(Omni.getCarStat()!=Omni4WD::STAT_ROTATERIGHT) 
         Omni.setCarSlow2Stop(uptime);
       Omni.setCarRotateRight(0);
     }
-  //printCom(dt);
   dt = 1000*((agvRadius*abs(angle))/(agvAdjSpeed));
   Omni.setCarSpeedMMPS(agvAdjSpeed, agvAdjTime);
   Omni.delayMS(dt,false);
@@ -259,7 +256,7 @@ void printComf(float i){
 
 //------------------------------------------------------------------------------
 // Method to compare serial commands
-void processCommand() {
+void processCommand(){
   // Stop agv
   if(!strncmp(buffer,"STOP",4)){
     allStop(agvSpeed);
@@ -267,7 +264,7 @@ void processCommand() {
     
   // Go forward
   }else if(!strncmp(buffer,"FORWARD",7)){
-    goAhead(agvSpeed);
+    goForward(agvSpeed);
     printCom("Forward");
     
   // Go backward
@@ -277,65 +274,60 @@ void processCommand() {
     
   // Go left
   }else if(!strncmp(buffer,"LEFT",4)){
-    turnLeft(agvSpeed);
+    goLeft(agvSpeed);
     printCom("Left");
     
   // Go right
   }else if(!strncmp(buffer,"RIGHT",5)){
-    turnRight(agvSpeed);
+    goRight(agvSpeed);
     printCom("Right");
     
-  // Search go Forwards
+  // Search forward
   }else if(!strncmp(buffer,"SFORWARD",8)){
-    goAhead(agvSpeeds);
-    printCom("Forwards");
+    goForward(agvSpeeds);
+    printCom("sForward");
     
-  // Search go backward
+  // Search backward
   }else if(!strncmp(buffer,"SBACKWARD",9)){
     goBack(agvSpeeds);
-    printCom("Backwards");
+    printCom("sBackward");
     
-  // Search go left
+  // Search left
   }else if(!strncmp(buffer,"SLEFT",5)){
-    turnLeft(agvSpeeds);
-    printCom("Lefts");
+    goLeft(agvSpeeds);
+    printCom("sLeft");
     
-  // Search go right
+  // Search right
   }else if(!strncmp(buffer,"SRIGHT",6)){
-    turnRight(agvSpeeds);
-    printCom("Rights");
-    
-    
-  // Rotate given +-angle [rad]
+    goRight(agvSpeeds);
+    printCom("sRight");
+        
+  // Rotate given angle, +clockwise -counterclockwise [rad]
   }else if(!strncmp(buffer,"ROTATE",6)){
      char *state = strchr(buffer,' ')+1;
      float angle = atof(state);
      rotateAngle(angle);
-     //printComf(angle);
      printCom("Rotate");
      
-  // Adjust +forward -backward [mm]
+  // Adjust given distance +forward -backward [mm]
   }else if(!strncmp(buffer,"ADJFB",5)){
      char *state = strchr(buffer,' ')+1;
      float dist = atof(state);
      moveDistanceFB(dist);
-     //printComf(angle);
      printCom("moveDistanceFB");
      
-  // Adjust +right -left [mm]
+  // Adjust given distance +right -left [mm]
   }else if(!strncmp(buffer,"ADJRL",5)){
      char *state = strchr(buffer,' ')+1;
      float dist = atof(state);
      moveDistanceRL(dist);
-     //printComf(angle);
      printCom("moveDistanceRL");
      
-  // Adjust +- rotate [rad]
+  // Adjust given angle rotate +clockwise -counterclockwise [rad]
   }else if(!strncmp(buffer,"ADJROT",6)){
      char *state = strchr(buffer,' ')+1;
      float angle = atof(state);
      adjRotateAngle(angle);
-     //printComf(angle);
      printCom("adjRotate");
      
   // Lift
@@ -366,7 +358,6 @@ void processCommand() {
      char *state = strchr(buffer,' ')+1;
      agvSpeed = atoi(state);
      printCom("SETSPEED");
-     //printCom(agvSpeed);
      
   // Set agv uptime
   }else if(!strncmp(buffer,"SETUPTIME",9)){
@@ -386,9 +377,8 @@ void processCommand() {
      liftDist = atoi(state);
      printCom("HIGHT");
      
-  // Get agv para
+  // Get agv parameters
   }else if(!strncmp(buffer,"GETPARA",7)){
-    //printCom(Omni.getCarStat());
     printCom(liftDist);
     printCom(duration);
     printCom(uptime);
@@ -396,12 +386,11 @@ void processCommand() {
     
   // Get agv Speed
   }else if(!strncmp(buffer,"GETSPEED",8)){
-    printCom(agvSpeed);
     printCom(Omni.getCarSpeedMMPS());
     
-  // RESET function
+  // Software RESET function
   }else if(!strncmp(buffer,"RESET",5)){
-    //Omni.demoActions(200,5000,500,false);
+    printCom("ARDUINO RESET");
     software_Reset();
     
   // Invalid command
@@ -409,6 +398,7 @@ void processCommand() {
     printCom("ERROR, INVALID COMMAND");
   }
 }
+    //Omni.demoActions(200,5000,500,false);
 
 //------------------------------------------------------------------------------
 // void setup
@@ -419,13 +409,12 @@ void setup() {
   TCCR1B = TCCR1B & 0b11111000 | 0x01;
   // PWM Timer for pin 3 and 11
   TCCR2B = TCCR2B & 0b11111000 | 0x01; 
+  // Enable PID regulator (KP,KI,KD) or (TauP,TauI,TauD) ?
   Omni.PIDEnable(0.31,0.01,0,10); 
-
-  //Omni.demoActions(200, 5000, 500, false);
+  // Start serial port
   Serial.begin(BAUD);
   sofar=0;
-  Serial.println("ARDUINO RESET");
-  // Stepper init
+  // Set stepper parameters
   stepper.setMaxSpeed(8000);
   stepper.setAcceleration(1000);
 }
@@ -438,9 +427,9 @@ void loop() {
   // listen for serial commands
   while(Serial.available() > 0) {
     buffer[sofar++]=Serial.read();
-    if(buffer[sofar-1]==';') break;  // in case there are multiple instructions
+    if(buffer[sofar-1]==';') 
+      break;  // in case there are multiple instructions
   }
-  
   // if we hit a semi-colon, assume end of instruction.
   if(sofar>0 && buffer[sofar-1]==';') {
    
@@ -452,20 +441,7 @@ void loop() {
   
     // reset the buffer
     sofar=0;
-    
-    //Serial.print("OK");
   }
-  
   // Regulate agv speed
   Omni.delayMS(duration,false);
-
-  /*
-	Omni.setCarLeft(0);
-	Omni.setCarSpeedMMPS(400,1000);
-
-	Omni.delayMS(5000);
-	Serial.println(Omni.getCarSpeedMMPS());
-	Omni.delayMS(1000);
-	Omni.setCarSlow2Stop(500); 
-*/
 }
