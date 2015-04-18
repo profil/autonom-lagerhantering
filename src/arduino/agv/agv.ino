@@ -10,6 +10,12 @@
 
 #include <AccelStepper.h>
 //------------------------------------------------------------------------------
+// RESET FUNCTION
+//------------------------------------------------------------------------------
+void software_Reset(){
+  asm volatile(" jmp 0");
+}
+//------------------------------------------------------------------------------
 // constants
 //------------------------------------------------------------------------------
 
@@ -60,11 +66,11 @@ Omni4WD Omni(&wheel4, &wheel3, &wheel2, &wheel1);
 //------------------------------------------------------------------------------
 // serial config
 //------------------------------------------------------------------------------
-
 char buffer[MAX_BUF];
 int sofar;
 boolean stopp = false;
 char test_on=0;  // only used in processCommand as an example.
+
 //------------------------------------------------------------------------------
 // Stepper config
 //------------------------------------------------------------------------------
@@ -72,7 +78,11 @@ int stepPin = 13;
 int dirPin = 6;
 int rev = 800;
 int liftPerRev = 4; //mm
+
+// ** Possible to change via labview
 int liftDist = 30; //mm
+// **
+
 int steps = rev*(liftDist/liftPerRev);
 boolean lifted = false;
 
@@ -82,12 +92,15 @@ AccelStepper stepper(1,stepPin,dirPin);
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
+// ** Possible to change via Labview
 unsigned int agvSpeed = 200;
 int uptime = 150;
 int duration = 100;
-float agvRadius = sqrt(pow(Omni.getWheelspan()/2,2)*2);
-int agvUptime = 100;
+// **
 
+// FIX in arduino
+unsigned int agvSpeeds = 75;
+float agvRadius = sqrt(pow(Omni.getWheelspan()/2,2)*2);
 int agvAdjTime = 10;
 unsigned int agvAdjSpeed = 75;
 
@@ -256,22 +269,44 @@ void processCommand() {
   }else if(!strncmp(buffer,"FORWARD",7)){
     goAhead(agvSpeed);
     printCom("Forward");
+    
   // Go backward
   }else if(!strncmp(buffer,"BACKWARD",8)){
     goBack(agvSpeed);
     printCom("Backward");
     
-  //Turn left
+  // Go left
   }else if(!strncmp(buffer,"LEFT",4)){
     turnLeft(agvSpeed);
     printCom("Left");
     
-  // Turn right
+  // Go right
   }else if(!strncmp(buffer,"RIGHT",5)){
     turnRight(agvSpeed);
     printCom("Right");
     
-  // Rotate given angle
+  // Search go Forwards
+  }else if(!strncmp(buffer,"SFORWARD",8)){
+    goAhead(agvSpeeds);
+    printCom("Forwards");
+    
+  // Search go backward
+  }else if(!strncmp(buffer,"SBACKWARD",9)){
+    goBack(agvSpeeds);
+    printCom("Backwards");
+    
+  // Search go left
+  }else if(!strncmp(buffer,"SLEFT",5)){
+    turnLeft(agvSpeeds);
+    printCom("Lefts");
+    
+  // Search go right
+  }else if(!strncmp(buffer,"SRIGHT",6)){
+    turnRight(agvSpeeds);
+    printCom("Rights");
+    
+    
+  // Rotate given +-angle [rad]
   }else if(!strncmp(buffer,"ROTATE",6)){
      char *state = strchr(buffer,' ')+1;
      float angle = atof(state);
@@ -279,7 +314,7 @@ void processCommand() {
      //printComf(angle);
      printCom("Rotate");
      
-  // Adjust forward backward
+  // Adjust +forward -backward [mm]
   }else if(!strncmp(buffer,"ADJFB",5)){
      char *state = strchr(buffer,' ')+1;
      float dist = atof(state);
@@ -287,7 +322,7 @@ void processCommand() {
      //printComf(angle);
      printCom("moveDistanceFB");
      
-  // Adjust right left
+  // Adjust +right -left [mm]
   }else if(!strncmp(buffer,"ADJRL",5)){
      char *state = strchr(buffer,' ')+1;
      float dist = atof(state);
@@ -295,16 +330,17 @@ void processCommand() {
      //printComf(angle);
      printCom("moveDistanceRL");
      
-  // Adjust rotate
+  // Adjust +- rotate [rad]
   }else if(!strncmp(buffer,"ADJROT",6)){
      char *state = strchr(buffer,' ')+1;
      float angle = atof(state);
      adjRotateAngle(angle);
      //printComf(angle);
-     printCom("adjRtate");
+     printCom("adjRotate");
      
-  // Adjust forward backward
+  // Lift
   }else if(!strncmp(buffer,"LIFT",4)){
+    steps = rev*(liftDist/liftPerRev);
     if(!lifted){
       stepper.moveTo(-steps);
       while(stepper.distanceToGo()!=0){
@@ -313,8 +349,10 @@ void processCommand() {
     lifted = true;
     printCom("LIFT");
   }
+  
   // Lower
   }else if(!strncmp(buffer,"LOWER",5)){
+    steps = rev*(liftDist/liftPerRev);
     if(lifted){
       stepper.moveTo(steps);
       while(stepper.distanceToGo()!=0){
@@ -330,19 +368,41 @@ void processCommand() {
      printCom("SETSPEED");
      //printCom(agvSpeed);
      
-  // Get agv State
-  }else if(!strncmp(buffer,"GETSTATE",8)){
-    printCom(Omni.getCarStat());
+  // Set agv uptime
+  }else if(!strncmp(buffer,"SETUPTIME",9)){
+     char *state = strchr(buffer,' ')+1;
+     uptime = atoi(state);
+     printCom("SETUPTIME");
+     
+  // Set agv Regulate
+  }else if(!strncmp(buffer,"SETREGULATE",11)){
+     char *state = strchr(buffer,' ')+1;
+     duration = atoi(state);
+     printCom("SETREGULATE");
+     
+  // Set liftdist
+  }else if(!strncmp(buffer,"HIGHT",5)){
+     char *state = strchr(buffer,' ')+1;
+     liftDist = atoi(state);
+     printCom("HIGHT");
+     
+  // Get agv para
+  }else if(!strncmp(buffer,"GETPARA",7)){
+    //printCom(Omni.getCarStat());
+    printCom(liftDist);
+    printCom(duration);
+    printCom(uptime);
+    printCom(agvSpeed);
     
   // Get agv Speed
   }else if(!strncmp(buffer,"GETSPEED",8)){
     printCom(agvSpeed);
     printCom(Omni.getCarSpeedMMPS());
     
-  // Demo function
-  }else if(!strncmp(buffer,"TEST",4)){
-    Omni.demoActions(200,5000,500,false);
-    printCom("Test");
+  // RESET function
+  }else if(!strncmp(buffer,"RESET",5)){
+    //Omni.demoActions(200,5000,500,false);
+    software_Reset();
     
   // Invalid command
   }else{
@@ -364,7 +424,7 @@ void setup() {
   //Omni.demoActions(200, 5000, 500, false);
   Serial.begin(BAUD);
   sofar=0;
-  
+  Serial.println("ARDUINO RESET");
   // Stepper init
   stepper.setMaxSpeed(8000);
   stepper.setAcceleration(1000);
