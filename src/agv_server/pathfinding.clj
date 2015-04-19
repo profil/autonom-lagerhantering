@@ -12,10 +12,10 @@
   (+ (Math/abs (- x2 x1)) (Math/abs (- y2 y1))))
 
 (defn cost
-  [current start end]
-  (let [g (manhattan start current)
-        h (manhattan current end)]
-    [(+ g h) g h]))
+  [g current end]
+  (let [h (manhattan current end)
+        f (+ g h)]
+    [f g]))
 
 
 (defn neighbours
@@ -47,23 +47,23 @@
   [map start end]
   (let [width (count (first map))
         height (count map)]
-    (loop [frontier (pm/priority-map-keyfn first start (cost start start end))
+    (loop [frontier (pm/priority-map-keyfn first start (cost 0 start end))
            visited {}]
-      (if-let [[current [f g h parent]] (peek frontier)]
+      (if-let [[current [f g parent]] (peek frontier)]
         (let [visited (assoc visited current parent)]
           (if-not (= current end)
             (let [neighbours (neighbours map current end)
                   frontier (reduce
                              (fn [frontier neighbour]
                                (if-not (contains? visited neighbour)
-                                 (let [[nf ng nh] (cost neighbour start end)]
+                                 (let [[nf ng] (cost (+ g 1) neighbour end)]
                                    (if (or (not (contains? frontier neighbour))
                                            (-> neighbour
                                                frontier 
                                                second
                                                (< ng)))
                                      (assoc frontier neighbour
-                                            [nf ng nh current])
+                                            [nf ng current])
                                      frontier))
                                  frontier))
                              (pop frontier) neighbours)]
