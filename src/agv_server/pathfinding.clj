@@ -2,10 +2,16 @@
   (:require [clojure.data.priority-map :as pm]))
 
 
-(def warehouse (atom [[[:free] [:free] [:free] [:free]]
-                      [[:shelf] [:shelf] [:shelf] [:free]]
-                      [[:free] [:free] [:free] [:free]]
-                      [[:free] [:free] [:free] [:free]]]))
+(def warehouse (atom [[ [:free] [:free] [:free] [:free] [:free] [:free] [:free] [:free]]
+                      [ [:free] [:none] [:none] [:none] [:none] [:none] [:none] [:free]]
+                      [ [:free] [:none] [:free] [:free] [:free] [:none] [:none] [:free]]
+                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:none] [:free]]
+                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:none] [:free]]
+                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:none] [:free]]
+                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:free] [:free]]
+                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:free] [:free]]
+                      [ [:free] [:shelf] [:free] [:free] [:free] [:free] [:free] [:free]]
+                      [ [:free] [:free] [:free] [:free] [:free] [:free] [:free] [:free]]]))
 
 (defn manhattan
   [[x1 y1] [x2 y2]]

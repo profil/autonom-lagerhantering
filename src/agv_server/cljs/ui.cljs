@@ -3,11 +3,23 @@
             [reagent.core :as r :refer [atom]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
+(defn input-field
+  [app-db event-bus]
+  (let [val (atom "")]
+    (fn []
+      [:input {:type "text" :value @val
+               :disabled (not (get @app-db :connected?))
+               :on-change #(reset! val (-> % .-target .-value))
+               :on-key-down #(case (.-which %)
+                               13 (put! event-bus [:search @val])
+                               27 (reset! val "")
+                               nil)}])))
+
 (defn app
   [app-db event-bus]
-  [:div
+  [:div {:class (if-not (get @app-db :connected?) "disabled")}
    [:h1 "Autonom lagerhantering"]
-   [:p "Connection to server: " (str (get @app-db :connected?))]
+   [:p#search [input-field app-db event-bus]]
    (let [warehouse (get @app-db :warehouse)
          size 30]
      [:svg {:width (* size (count (first warehouse)))
@@ -25,7 +37,7 @@
                            :free  "#eee"
                            :agv   "#286090"
                            :shelf "#31b0d5"
-                           4 "#5cb85c")}])])])
+                           :path  "#c1ddf9")}])])])
    [:ul
     (for [agv (get @app-db :agvs)]
       ^{:key agv} [:li agv])]])

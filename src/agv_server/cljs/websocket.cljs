@@ -19,7 +19,7 @@
             (if (nil? data)
               (do (close! out)
                   (.close ws))
-              (do (.send ws data)
+              (do (.send ws (pr-str data))
                   (recur)))))))
     (set! (.-onclose ws)
       (fn []

@@ -2,7 +2,8 @@
   (:require [agv-server.state :as st]
             [aleph.http :as http]
             [manifold.stream :as s]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [agv-server.pathfinding :as p]))
 
 
 (defn put-all-users
@@ -32,13 +33,9 @@
     (s/connect-via s
       (fn [data]
         (let [[event msg] (edn/read-string data)]
-          (case msg
-            "stop" (s/put! s (handle-direction "STOP"))
-            "north" (s/put! s (handle-direction "NORTH"))
-            "west" (s/put! s (handle-direction "WEST"))
-            "east" (s/put! s (handle-direction "EAST"))
-            "south" (s/put! s (handle-direction "SOUTH"))
-            (s/put! s (str "got unknown" msg)))))
+          (s/put! s (case event
+            :go-to (str [:path (p/astar @p/warehouse (:from msg) (:to msg))])
+            (str [:error "unknown event"])))))
       s)))
 
 
