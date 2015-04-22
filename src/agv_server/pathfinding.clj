@@ -39,6 +39,18 @@
           []
           [[y (- x 1)] [(+ y 1) x] [y (+ x 1)] [(- y 1) x]]))
 
+(defn directions
+  [path]
+  (let [dirs
+        {[ 1  0] "SOUTH"
+         [-1  0] "NORTH"
+         [ 0  1] "EAST"
+         [ 0 -1] "WEST"}]
+    (loop [[f s & xs] path
+           ret []]
+      (if-not (or (nil? f) (nil? s))
+        (recur (cons s xs) (conj ret (dirs [(- (s 0) (f 0)) (- (s 1) (f 1))])))
+        ret))))
 
 (defn rebuild-path
   [current visited]
@@ -65,7 +77,7 @@
                                  (let [[nf ng] (cost (+ g 1) neighbour end)]
                                    (if (or (not (contains? frontier neighbour))
                                            (-> neighbour
-                                               frontier 
+                                               frontier
                                                second
                                                (< ng)))
                                      (assoc frontier neighbour
