@@ -100,6 +100,7 @@ unsigned int agvSpeeds = 75;
 float agvRadius = sqrt(pow(Omni.getWheelspan()/2,2)*2);
 int agvAdjTime = 10;
 unsigned int agvAdjSpeed = 75;
+int agvAdjUptime = 150;
 
 int agvRotSpeed= 100; // rotationspeed during rotation
 int agvRotUptime = 50; // upTime during rotation
@@ -139,14 +140,14 @@ void rotateRight(unsigned int speedMMPS){
   if(Omni.getCarStat()!=Omni4WD::STAT_ROTATERIGHT) 
     Omni.setCarSlow2Stop(uptime);
   Omni.setCarRotateRight(0);
-  Omni.setCarSpeedMMPS(speedMMPS, uptime);
+  Omni.setCarSpeedMMPS(speedMMPS, agvRotUptime);
 }
 
 void rotateLeft(unsigned int speedMMPS){
   if(Omni.getCarStat()!=Omni4WD::STAT_ROTATELEFT) 
     Omni.setCarSlow2Stop(uptime);
   Omni.setCarRotateLeft(0);
-  Omni.setCarSpeedMMPS(speedMMPS, uptime);
+  Omni.setCarSpeedMMPS(speedMMPS, agvRotUptime);
 }
 
 /* 
@@ -196,7 +197,7 @@ void moveDistanceFB(float dist){
   dt = (1000*abs(dist)/agvAdjSpeed) - agvAdjTime;
   Omni.setCarSpeedMMPS(agvAdjSpeed, agvAdjTime);
   Omni.delayMS(dt,false);
-  allStop(agvAdjTime);
+  allStop(agvAdjTime,agvAdjTime);
 }
 
 // move distance +right -left [mm]
@@ -214,7 +215,7 @@ void moveDistanceRL(float dist){
   dt = (1000*abs(dist)/agvAdjSpeed) - agvAdjTime;    
   Omni.setCarSpeedMMPS(agvAdjSpeed, agvAdjTime);
   Omni.delayMS(dt,false);
-  allStop(agvAdjTime);
+  allStop(agvAdjSpeed,agvAdjTime);
 }
 
 // Car ADJUST rotate given angle, +clockwise -counterclockwise [rad]
@@ -236,9 +237,9 @@ void adjRotateAngle(float angle){
 }
 
 //Stop all
-void allStop(unsigned int speedMMPS){
+void allStop(unsigned int speedMMPS, int upTime){
   if(Omni.getCarStat()!=Omni4WD::STAT_STOP) 
-    Omni.setCarSlow2Stop(uptime);
+    Omni.setCarSlow2Stop(upTime);
   Omni.setCarStop();
 }
 //------------------------------------------------------------------------------
@@ -259,7 +260,7 @@ void printComf(float i){
 void processCommand(){
   // Stop agv
   if(!strncmp(buffer,"STOP",4)){
-    allStop(agvSpeed);
+    allStop(agvSpeed, uptime);
     printCom("Stop");
     
   // Go forward

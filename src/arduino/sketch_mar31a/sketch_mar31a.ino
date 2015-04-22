@@ -8,13 +8,13 @@ AccelStepper stepper(1, 7, 6);
 int sleep = 5;
 
 
-int steps = 100;
-int n = 100;
+int steps = 200;
+int n = 5;
 int fullStepp = 1;  // MS1 == 0 && MS2 == 0
 int halfStepp = 2;  // MS1 == 1 && MS2 == 0
 int fourStepp = 4;  // MS1 == 0 && MS2 == 1
 int eightStepp = 8;  // MS1 == 1 && MS2 == 1
-int pos = n*steps*fullStepp;
+int pos = n*steps*eightStepp;
 boolean slept = false;
 
 char buffer[64];
@@ -27,6 +27,11 @@ void setup()
   Serial.begin(9600);
   pinMode(sleep,OUTPUT);
   sofar = 0;
+  digitalWrite(sleep,HIGH);
+  stepper.moveTo(-pos);
+  while(stepper.distanceToGo ()!=0){
+    stepper.run();
+  }
 }
 void loop()
 {
@@ -44,7 +49,7 @@ void loop()
     // do something with the command
     if(!strncmp(buffer,"LIFT",4)){
       digitalWrite(sleep,HIGH);
-      stepper.moveTo(pos);
+      stepper.moveTo(-pos);
       while(stepper.distanceToGo ()!=0){
         stepper.run();
       }
@@ -53,7 +58,7 @@ void loop()
     
     }else if(!strncmp(buffer,"LOWER",4)){
       digitalWrite(sleep,HIGH);
-      stepper.moveTo(-pos);
+      stepper.moveTo(pos);
       while(stepper.distanceToGo ()!=0){
         stepper.run();
       }
