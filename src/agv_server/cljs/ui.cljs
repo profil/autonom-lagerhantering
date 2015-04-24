@@ -8,39 +8,64 @@
   (let [val (atom "")]
     (fn []
       [:input {:type "text" :value @val
+               :placeholder "Artikelnr.."
+               :autoFocus "autoFocus"
                :disabled (not (get @app-db :connected?))
                :on-change #(reset! val (-> % .-target .-value))
                :on-key-down #(case (.-which %)
-                               13 (put! event-bus [:search @val])
+                               13 (do (put! event-bus [:search @val])
+                                      (reset! val ""))
                                27 (reset! val "")
                                nil)}])))
 
-(defn app
+(defn agv-list
   [app-db event-bus]
-  [:div {:class (if-not (get @app-db :connected?) "disabled")}
-   [:h1 "Autonom lagerhantering"]
-   [:p#search [input-field app-db event-bus]]
-   (let [warehouse (get @app-db :warehouse)
-         size 30]
-     [:svg {:width (* size (count (first warehouse)))
-            :height (* size (count warehouse))}
-      (for [[row-index row] (map-indexed vector warehouse)]
-        ^{:key row-index}
-        [:g {:transform (str "translate(0, " (* row-index size) ")")}
-         (for [[col-index cell] (map-indexed vector row)]
-           ^{:key (+ col-index row-index)}
-           [:rect {:x (* col-index size)
-                   :width (- size (/ size 10))
-                   :height (- size (/ size 10))
-                   :fill (case (first cell)
-                           :none  "#fff"
-                           :free  "#eee"
-                           :agv   "#286090"
-                           :shelf "#31b0d5"
-                           :path  "#c1ddf9")}])])])
+  [:div#list.sidebar-content
+   [:h3 "Tillgängliga AGV"]
    [:ul
     (for [agv (get @app-db :agvs)]
       ^{:key agv} [:li agv])]])
+
+(defn main-content
+  [app-db event-bus]
+  [:div#content
+   (for [[id agv done] (get @app-db :orders)]
+     ^{:key id}
+     [:div.order {:class (if done "accept")}
+      [:h4 "#" id]
+      (if done [:button.accept "Kvittera"] [:button.abort "Avbryt"])
+      [:p (if (nil? agv) "Väntar på AGV" (str "Hämtas av: " agv))]])])
+
+(defn app
+  [app-db event-bus]
+  [:div  {:class (if-not (get @app-db :connected?) "disabled")}
+   [:header [:h1 "Sök och hämta produkt ur varulager"]]
+   [:main
+    [:p#search [input-field app-db event-bus]]
+    [:section
+     [:div.sidebar
+      [agv-list app-db event-bus]
+      [:div#warehouse.sidebar-content
+       [:h3 "Realtidskarta"]
+       (let [warehouse (get @app-db :warehouse)
+             size 15]
+         [:svg {:width (* size (count (first warehouse)))
+                :height (* size (count warehouse))}
+          (for [[row-index row] (map-indexed vector warehouse)]
+            ^{:key row-index}
+            [:g {:transform (str "translate(0, " (* row-index size) ")")}
+             (for [[col-index cell] (map-indexed vector row)]
+               ^{:key (+ col-index row-index)}
+               [:rect {:x (* col-index size)
+                       :width (- size (/ size 10))
+                       :height (- size (/ size 10))
+                       :fill (case (first cell)
+                               :none  "#fff"
+                               :free  "#eee"
+                               :agv   "#286090"
+                               :shelf "#31b0d5"
+                               :path  "#c1ddf9")}])])])]]
+     [main-content app-db event-bus]]]])
 
 (defn render
   [app-db event-bus]

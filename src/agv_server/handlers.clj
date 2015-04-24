@@ -3,14 +3,15 @@
             [aleph.http :as http]
             [manifold.stream :as s]
             [clojure.edn :as edn]
-            [agv-server.pathfinding :as p]))
+            [agv-server.pathfinding :as p]
+            [manifold.deferred :as d]))
 
 
 (defn put-all-users
   [msg]
   (let [users (st/get-users)]
     (doseq [user (vals users)]
-      (s/put! (:stream user) (str msg)))))
+      (s/put! (:stream user) (pr-str msg)))))
 
 
 ;; WebSocket!
@@ -27,15 +28,14 @@
         user (get-in req [:headers "sec-websocket-key"])]
     (st/add-user user s)
     (s/on-closed s #(st/remove-user user))
-    (doseq [agv (st/get-clients)]
-      (s/put! s (str [:connect (key agv)]))
-      (s/put! s (str [:move {:from nil :to (:ready (val agv)) :id (key agv)}])))
+    (s/put! s (pr-str [:agvs (keys (st/get-clients))]))
+    (s/put! s (pr-str [:warehouse (st/get-map)]))
     (s/connect-via s
       (fn [data]
         (let [[event msg] (edn/read-string data)]
-          (s/put! s (case event
-            :go-to (str [:path (p/astar @p/warehouse (:from msg) (:to msg))])
-            (str [:error "unknown event"])))))
+          (case event
+            :search (s/put! s (pr-str [:orders [["123123" nil false]]]))
+            (d/future true))))
       s)))
 
 
@@ -53,8 +53,9 @@
 (defn disconnect-handler
   [session]
   (when-let [client (:client @session)]
-    (put-all-users [:disconnect client])
-    (st/remove-client client)))
+    (st/remove-client client)
+    (put-all-users [:agvs (keys (st/get-clients))])
+    (put-all-users [:warehouse (st/get-map)])))
 
 (defn login-handler
   [[client & params] session]
@@ -77,11 +78,9 @@
   (with-session @session
     (if (nil? y)
       (str "ERROR No coordinates given")
-      (let [[from to] (st/set-client-ready
-                                (:client @session)
-                                [(edn/read-string y) (edn/read-string x)])]
-          (put-all-users [:connect (:client @session)])
-          (put-all-users [:move {:from from :to to :id (:client @session)}])))))
+      (do (st/set-client-ready (:client @session) [(edn/read-string y) (edn/read-string x)])
+          (put-all-users [:agvs (keys (st/get-clients))])
+          (put-all-users [:warehouse (st/get-map)])))))
 
 (defn ok-handler
   [session]
