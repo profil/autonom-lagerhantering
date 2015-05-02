@@ -12,8 +12,9 @@
 ; Start!
 (ui/render state event-bus)
 
+
 (go
-  (let [{:keys [in out]} (<! (ws/connect! "ws://localhost:3000/ws"))]
+  (let [{:keys [in out]} (<! (ws/connect! (str "ws://" (.-host js/location) "/ws")))]
     (swap! state assoc :connected? true)
 
     (go-loop []
