@@ -22,7 +22,7 @@
                        (>= dy 0)
                        (< dx (count (first map)))
                        (< dy (count map))
-                       (= :free (get-in map [dy dx 0])))
+                       (= :free (get-in map [dy dx])))
                 (conj res [dy dx])
                 res)))
           []

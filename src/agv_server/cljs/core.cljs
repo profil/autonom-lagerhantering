@@ -20,6 +20,8 @@
       (let [[event msg] (<! event-bus)]
         (case event
           :search (>! in [:search msg])
+          :accept (>! in [:accept msg])
+          :abort (>! in [:abort msg])
           nil)
         (recur)))
 
@@ -30,6 +32,7 @@
             :agvs (swap! state assoc :agvs msg)
             :orders (swap! state assoc :orders msg)
             :warehouse (swap! state assoc :warehouse msg)
+            :error (js/alert "Ogiltigt artikelnummer")
             nil)
           (recur))
         (swap! state assoc :connected? false)))))

@@ -29,11 +29,13 @@
 (defn main-content
   [app-db event-bus]
   [:div#content
-   (for [[id agv done] (get @app-db :orders)]
+   (for [[id {:keys [agv done shelf]}] (get @app-db :orders)]
      ^{:key id}
      [:div.order {:class (if done "accept")}
       [:h4 "#" id]
-      (if done [:button.accept "Kvittera"] [:button.abort "Avbryt"])
+      (if done
+        [:button.accept {:on-click #(put! event-bus [:accept id])} "Kvittera"]
+        [:button.abort {:on-click #(put! event-bus [:abort id])} "Avbryt"])
       [:p (if (nil? agv) "Väntar på AGV" (str "Hämtas av: " agv))]])])
 
 (defn app
@@ -48,7 +50,7 @@
       [:div#warehouse.sidebar-content
        [:h3 "Realtidskarta"]
        (let [warehouse (get @app-db :warehouse)
-             size 15]
+             size 30]
          [:svg {:width (* size (count (first warehouse)))
                 :height (* size (count warehouse))}
           (for [[row-index row] (map-indexed vector warehouse)]
@@ -59,12 +61,12 @@
                [:rect {:x (* col-index size)
                        :width (- size (/ size 10))
                        :height (- size (/ size 10))
-                       :fill (case (first cell)
-                               :none  "#fff"
-                               :free  "#eee"
-                               :agv   "#286090"
-                               :shelf "#31b0d5"
-                               :path  "#c1ddf9")}])])])]]
+                       :fill (case (-> cell name (.split "-") first)
+                               "none"    "#fff"
+                               "free"    "#eee"
+                               "agv"     "#286090"
+                               "s"       "#31b0d5"
+                               "station" "#0f0")}])])])]]
      [main-content app-db event-bus]]]])
 
 (defn render

@@ -16,7 +16,7 @@
     (s/splice out (io/decode-stream s protocol))))
 
 (defn start-server
-  [handler port]
+ [handler port]
   (tcp/start-server
     (fn [s info]
       (handler (wrap-duplex-stream protocol s) info))

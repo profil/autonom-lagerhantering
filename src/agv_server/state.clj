@@ -1,17 +1,21 @@
-(ns agv-server.state)
+(ns agv-server.state
+  (:require [agv-server.pathfinding :as p]
+            [manifold.stream :as s]))
 
 (def state (atom {}))
 (def users (atom {}))
-(def warehouse (atom [[ [:free] [:free] [:free] [:free] [:free] [:free] [:free] [:free]]
-                      [ [:free] [:none] [:none] [:none] [:none] [:none] [:none] [:free]]
-                      [ [:free] [:none] [:free] [:free] [:free] [:none] [:none] [:free]]
-                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:none] [:free]]
-                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:none] [:free]]
-                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:none] [:free]]
-                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:free] [:free]]
-                      [ [:free] [:none] [:free] [:free] [:free] [:free] [:free] [:free]]
-                      [ [:free] [:shelf] [:free] [:free] [:free] [:free] [:free] [:free]]
-                      [ [:free] [:free] [:free] [:free] [:free] [:free] [:free] [:free]]]))
+(def warehouse (atom [[ :free :station :free :free ]
+                      [ :free :free    :free :free ]
+                      [ :free :free    :free :free ]
+                      [ :free :free    :s-0  :s-1  ]]))
+(def orders (atom {}))
+(def shelves (atom {:s-0 {:coords [3 2] :agv nil}
+                    :s-1 {:coords [3 3] :agv nil}
+                    :station {:coords [0 1]}}))
+(def inventory (atom {"10000" :s-0
+                      "10001" :s-1
+                      "10002" :s-0
+                      "10003" :s-0}))
 
 
 (defn add-client
@@ -22,10 +26,7 @@
 (defn remove-client
   [client]
   (if (contains? @state client)
-    (do
-      (if-let [coords (get-in @state [client :ready])]
-        (swap! warehouse assoc-in coords [:free]))
-      (swap! state dissoc client))))
+    (swap! state dissoc client)))
 
 (defn get-client
   [client]
@@ -38,18 +39,30 @@
 (defn get-any-client
   []
   (let [s @state
-        readys (filter #(:ready (second %)) s)
+        readys (filter #(and (not (:busy (second %))) (:ready (second %))) s)
         r (into {} readys)]
     (first r)))
 
+(declare agv-go-to)
+
+
+(defn do-next-order
+  [agv]
+  (when-let [[id value] (first (filter #(-> % val :agv nil?) @orders))]
+    (swap! orders assoc-in [id :agv] agv)
+    (let [shelf (get-in @orders [id :shelf])
+          to (get-in @shelves [shelf :coords])]
+      (swap! state assoc-in [agv :busy] to)
+      (agv-go-to agv to))))
+
 (defn set-client-ready
   [client coords]
-  (if-let [from (get-in @state [client :ready])]
-    (swap! warehouse
-           #(assoc-in (assoc-in % from [:free])
-                      coords [:agv]))
-    (swap! warehouse assoc-in coords [:agv]))
-  (swap! state assoc-in [client :ready] coords))
+  (swap! state assoc-in [client :ready] coords)
+  (if-let [to (get-in @state [client :busy])]
+    ; Continue with the task
+    (agv-go-to client to)
+    ; Work with new task!
+    (do-next-order client)))
 
 
 (defn add-user
@@ -66,5 +79,110 @@
 
 (defn get-map
   []
-  @warehouse)
+  (let [warehouse @warehouse
+        agv-coords (keep #(-> % val :ready) @state)]
+    (reduce
+      (fn [map coords]
+        (assoc-in map coords :agv))
+      warehouse
+      agv-coords)))
+
+(defn get-orders
+  []
+  @orders)
+
+(defn orders-done
+  [orders shelf]
+  (let [ids (keep #(when (-> % val :shelf (= shelf)) (key %)) orders)]
+    (reduce
+      (fn [map id]
+        (assoc-in map [id :done] true))
+      orders
+      ids)))
+
+(defn agv-lift
+  [agv shelf]
+  (swap! shelves assoc-in [shelf :agv] agv)
+  (swap! state assoc-in [agv :lift] shelf)
+  "LIFT")
+
+(defn agv-lower
+  [agv]
+  (when-let [shelf (get-in @state [agv :lift])]
+    (swap! shelves assoc-in [shelf :agv] nil)
+    (swap! state assoc-in [agv :lift] nil)
+    "LOWER"))
+
+(defn lift-or-lower
+  [agv shelf]
+  (if (get-in @state [agv :lift])
+    (agv-lower agv)
+    (agv-lift agv shelf)))
+
+(defn lift-or-lower-ok
+  [agv]
+  (if-let [shelf (get-in @state [agv :lift])]
+    ; Lift is OK, now go to station
+    (let [station-coords (get-in @shelves [:station :coords])]
+      (swap! state assoc-in [agv :busy] station-coords)
+      (agv-go-to agv station-coords))
+    ; Lower is OK
+    (do (swap! state assoc-in [agv :busy] nil)
+        (do-next-order agv))))
+
+(defn agv-go-to
+  [agv to]
+  (let [from (get-in @state [agv :ready])
+        path (p/astar (get-map) from to)
+        [n & _] (p/directions path)
+        stream (get-in @state [agv :stream])]
+    (if-not (nil? n)
+      n
+      (let [cell (get-in @warehouse to)]
+        (case (-> cell name (.split "-") first)
+          "s" (lift-or-lower agv cell)
+          "station" (swap! orders orders-done (get-in @state [agv :lift]))
+          "ERROR Unknown error")))))
+
+
+(defn get-part
+  [id]
+  (if-let [shelf (get @inventory id)]
+    (let [agv (first (keep #(if (-> % val :shelf (= shelf)) (-> % val :agv)) @orders))]
+      (if agv
+        (pr-str [:orders (swap! orders assoc id {:agv agv :done false :shelf shelf})])
+        (let [agv (first (get-any-client))]
+          (when-not (nil? agv)
+            (swap! state assoc-in [agv :busy] (get-in @shelves [shelf :coords]))
+            (s/put! (get-in @state [agv :stream])
+                    (agv-go-to agv (get-in @shelves [shelf :coords]))))
+          (pr-str [:orders (swap! orders assoc id {:agv agv :done false :shelf shelf})]))))
+    (pr-str [:error :invalid-id])))
+
+(defn return-shelf
+  [agv shelf]
+  (let [to (get-in @shelves [shelf :coords])]
+    (swap! state assoc-in [agv :busy] to)
+    (s/put! (get-in @state [agv :stream]) (agv-go-to agv to))))
+
+(defn accept-order
+  [id]
+  (let [shelf (get-in @orders [id :shelf])
+        agv (get-in @orders [id :agv])
+        new-orders (swap! orders dissoc id)]
+    (when-not (some #(-> % val :shelf (= shelf)) new-orders)
+      ;; Return shelf
+      (return-shelf agv shelf))
+    (pr-str [:orders new-orders])))
+
+(defn abort-order
+  [id]
+  ;; Take care of putting back shelf if holding one
+  (let [order (get @orders id)
+        shelf (get order :shelf)
+        agv (get order :agv)]
+    (if (get-in @state [agv :lift])
+      (return-shelf agv shelf)
+      (swap! state assoc-in [agv :busy] nil))
+    (pr-str [:orders (swap! orders dissoc id)])))
 

@@ -30,11 +30,17 @@
     (s/on-closed s #(st/remove-user user))
     (s/put! s (pr-str [:agvs (keys (st/get-clients))]))
     (s/put! s (pr-str [:warehouse (st/get-map)]))
+    (s/put! s (pr-str [:orders (st/get-orders)]))
+    (add-watch st/orders :key
+               (fn [k r os ns]
+                 (s/put! s (pr-str [:orders ns]))))
     (s/connect-via s
       (fn [data]
         (let [[event msg] (edn/read-string data)]
           (case event
-            :search (s/put! s (pr-str [:orders [["123123" nil false]]]))
+            :search (s/put! s (st/get-part msg))
+            :accept (s/put! s (st/accept-order msg))
+            :abort (s/put! s (st/abort-order msg))
             (d/future true))))
       s)))
 
@@ -78,13 +84,17 @@
   (with-session @session
     (if (nil? y)
       (str "ERROR No coordinates given")
-      (do (st/set-client-ready (:client @session) [(edn/read-string y) (edn/read-string x)])
-          (put-all-users [:agvs (keys (st/get-clients))])
-          (put-all-users [:warehouse (st/get-map)])))))
+      (let [ret (st/set-client-ready (:client @session)
+                                     [(edn/read-string y)
+                                      (edn/read-string x)])]
+        (put-all-users [:agvs (keys (st/get-clients))])
+        (put-all-users [:warehouse (st/get-map)])
+        ret))))
 
 (defn ok-handler
   [session]
-  (with-session @session nil))
+  (with-session @session
+    (st/lift-or-lower-ok (:client @session))))
 
 (defn err-handler
   [command params session]
