@@ -60,6 +60,7 @@
   [session]
   (when-let [client (:client @session)]
     (st/remove-client client)
+    (put-all-users [:error (str "AGV " client " disconnected")])
     (put-all-users [:agvs (keys (st/get-clients))])
     (put-all-users [:warehouse (st/get-map)])))
 

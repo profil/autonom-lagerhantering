@@ -157,7 +157,7 @@
             (s/put! (get-in @state [agv :stream])
                     (agv-go-to agv (get-in @shelves [shelf :coords]))))
           (pr-str [:orders (swap! orders assoc id {:agv agv :done false :shelf shelf})]))))
-    (pr-str [:error :invalid-id])))
+    (pr-str [:error "Ogiltigt artikelnummer"])))
 
 (defn return-shelf
   [agv shelf]

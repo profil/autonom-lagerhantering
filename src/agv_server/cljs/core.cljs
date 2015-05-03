@@ -33,7 +33,7 @@
             :agvs (swap! state assoc :agvs msg)
             :orders (swap! state assoc :orders msg)
             :warehouse (swap! state assoc :warehouse msg)
-            :error (js/alert "Ogiltigt artikelnummer")
+            :error (js/alert msg)
             nil)
           (recur))
         (swap! state assoc :connected? false)))))
