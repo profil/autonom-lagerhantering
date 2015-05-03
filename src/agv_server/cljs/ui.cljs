@@ -66,7 +66,8 @@
                                "free"    "#eee"
                                "agv"     "#286090"
                                "s"       "#31b0d5"
-                               "station" "#0f0")}])])])]]
+                               "station" "#0f0"
+                               "block"   "#d9534f")}])])])]]
      [main-content app-db event-bus]]]])
 
 (defn render

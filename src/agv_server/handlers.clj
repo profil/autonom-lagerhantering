@@ -97,6 +97,11 @@
   (with-session @session
     (st/lift-or-lower-ok (:client @session))))
 
+(defn block-handler
+  [[direction & params] session]
+  (with-session @session
+    (put-all-users [:warehouse (st/blocked-map (:client @session) direction)])))
+
 (defn err-handler
   [command params session]
   (str "ERROR Unknown command, session: " @session))
@@ -109,4 +114,5 @@
       "PONG" (pong-handler session)
       "READY" (ready-handler params session)
       "OK" (ok-handler session)
+      "BLOCK" (block-handler params session)
       (err-handler command params session))))

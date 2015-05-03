@@ -187,3 +187,14 @@
       (swap! state assoc-in [agv :busy] nil))
     (pr-str [:orders (swap! orders dissoc id)])))
 
+(defn blocked-map
+  [agv direction]
+  (let [p (get-in @state [agv :ready])
+        dirs {"SOUTH" [ 1  0]
+              "NORTH" [-1  0]
+              "EAST"  [ 0  1]
+              "WEST"  [ 0 -1]}
+        coords (vec (map #(+ %1 %2) p (dirs direction)))]
+    (swap! warehouse assoc-in coords :block)
+    (get-map)))
+
