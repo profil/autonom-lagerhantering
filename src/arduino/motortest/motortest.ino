@@ -39,11 +39,14 @@ void test_motor(int dir, int pwm) {
   digitalWrite(dir, LOW);
   delay(500);
   analogWrite(pwm, 50);
+  
   delay(1000);
+  Serial.println(Omni.getCarSpeedMMPS());
   analogWrite(pwm, 0);
   digitalWrite(dir, HIGH);
   delay(500);
   analogWrite(pwm, 50);
   delay(1000);
+  Serial.println(Omni.getCarSpeedMMPS());
   analogWrite(pwm, 0);
 }

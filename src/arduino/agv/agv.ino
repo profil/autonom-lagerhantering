@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include <MotorWheel.h>
 #include <Omni3WD.h>
-#include <Omni4WD.h>
+#include <Omni4WD.h> 
 #include <PID_Beta6.h>
 #include <PinChangeInt.h>
 #include <PinChangeIntConfig.h>
@@ -57,9 +57,9 @@ irqISR(irq4,isr4);
 MotorWheel wheel4(pwm4, dir4, 18, 19, &irq4);
 
 // wrong definition according to forward, backward, left,right
-//Omni4WD Omni(&wheel1, &wheel2, &wheel3, &wheel4); 
+Omni4WD Omni(&wheel1, &wheel2, &wheel3, &wheel4); 
 
-Omni4WD Omni(&wheel4, &wheel3, &wheel2, &wheel1);
+//Omni4WD Omni(&wheel4, &wheel3, &wheel2, &wheel1);
 
 //------------------------------------------------------------------------------
 // serial config
@@ -72,12 +72,12 @@ boolean stopp = false;
 // Stepper config
 //------------------------------------------------------------------------------
 // ** Possible to change via labview
-int liftDist = 30; //mm
+int liftDist = 20; //mm
 // **
-int stepPin = 13;
-int dirPin = 6;
+int stepPin = 13; // röd
+int dirPin = 6;   // gul. gul gnd, svart 0 RX, vit 1 TX
 int rev = 800;
-
+boolean initLift = true;
 int liftPerRev = 4; //mm
 int steps = rev*(liftDist/liftPerRev);
 boolean lifted = false;
@@ -90,50 +90,57 @@ AccelStepper stepper(1,stepPin,dirPin);
 // global variables
 //------------------------------------------------------------------------------
 // ** Possible to change via Labview
+int duration = 100;
+
+// Parameters when going F,B,R,L
 unsigned int agvSpeed = 200;
 int uptime = 150;
-int duration = 100;
 // **
 
 // FIX in arduino
-unsigned int agvSpeeds = 75;
 float agvRadius = sqrt(pow(Omni.getWheelspan()/2,2)*2);
-int agvAdjTime = 10;
-unsigned int agvAdjSpeed = 75;
-int agvAdjUptime = 150;
 
-int agvRotSpeed= 100; // rotationspeed during rotation
-int agvRotUptime = 50; // upTime during rotation
+// Parameters when searching for QR
+unsigned int agvSpeeds = 75;
+int agvUptimes = 150;
+
+// Parameters when adjusting accuracy F,B,R,L
+unsigned int agvAdjSpeed = 75;
+int agvAdjTime = 10;
+
+// Parameters when adjusting accuracy Rotation
+int agvRotSpeed= 100;
+int agvRotUptime = 25;
 
 //------------------------------------------------------------------------------
 //AGV methods
 //------------------------------------------------------------------------------
-void goForward(unsigned int speedMMPS){ // Car moves advance
+void goForward(unsigned int speedMMPS, int upTime){ // Car moves advance
   if(Omni.getCarStat()!=Omni4WD::STAT_ADVANCE) 
-    Omni.setCarSlow2Stop(uptime);
+    Omni.setCarSlow2Stop(upTime);
   Omni.setCarAdvance(0); 
-  Omni.setCarSpeedMMPS(speedMMPS, uptime);
+  Omni.setCarSpeedMMPS(speedMMPS, upTime);
 }
 
-void goBack(unsigned int speedMMPS){ // Car moves advance
+void goBack(unsigned int speedMMPS, int upTime){ // Car moves advance
   if(Omni.getCarStat()!=Omni4WD::STAT_BACKOFF) 
-    Omni.setCarSlow2Stop(uptime);
+    Omni.setCarSlow2Stop(upTime);
   Omni.setCarBackoff(0); 
-  Omni.setCarSpeedMMPS(speedMMPS, uptime);
+  Omni.setCarSpeedMMPS(speedMMPS, upTime);
 }
 
-void goLeft(unsigned int speedMMPS){
+void goLeft(unsigned int speedMMPS, int upTime){
   if(Omni.getCarStat()!=Omni4WD::STAT_LEFT) 
-    Omni.setCarSlow2Stop(uptime);
+    Omni.setCarSlow2Stop(upTime);
   Omni.setCarLeft(0);
-  Omni.setCarSpeedMMPS(speedMMPS, uptime);
+  Omni.setCarSpeedMMPS(speedMMPS, upTime);
 }
 
-void goRight(unsigned int speedMMPS){
+void goRight(unsigned int speedMMPS, int upTime){
   if(Omni.getCarStat()!=Omni4WD::STAT_RIGHT) 
-    Omni.setCarSlow2Stop(uptime);
+    Omni.setCarSlow2Stop(upTime);
   Omni.setCarRight(0);
-  Omni.setCarSpeedMMPS(speedMMPS, uptime);
+  Omni.setCarSpeedMMPS(speedMMPS, upTime);
 }
 
 void rotateRight(unsigned int speedMMPS){
@@ -162,23 +169,25 @@ void rotateAngle(float angle){
   int dt = 0;
     if(angle<0){
       if(Omni.getCarStat()!=Omni4WD::STAT_ROTATELEFT) 
-        Omni.setCarSlow2Stop(uptime);
+        Omni.setCarSlow2Stop(agvRotUptime);
       Omni.setCarRotateLeft(0);
     }else{
       if(Omni.getCarStat()!=Omni4WD::STAT_ROTATERIGHT) 
-        Omni.setCarSlow2Stop(uptime);
+        Omni.setCarSlow2Stop(agvRotUptime);
       Omni.setCarRotateRight(0);
     }
-  dt = 1000*((agvRadius*abs(angle))/(agvRotSpeed));
+  dt = 1000*(((agvRadius*abs(angle)))/(agvRotSpeed));//-agvRotUptime;
   Omni.setCarSpeedMMPS(agvRotSpeed, agvRotUptime);
   Omni.delayMS(dt,false);
-  rotStop(agvRotSpeed);
+  rotStop(agvRotSpeed, agvRotUptime);
+  //printCom(dt);
+  //printCom(agvRadius);
 }
 
 // Stop rotation, note agvRotUptime
-void rotStop(unsigned int speedMMPS){
+void rotStop(unsigned int speedMMPS, int upTime){
   if(Omni.getCarStat()!=Omni4WD::STAT_STOP) 
-    Omni.setCarSlow2Stop(agvRotUptime);
+    Omni.setCarSlow2Stop(upTime);
   Omni.setCarStop();
 }
 
@@ -194,7 +203,8 @@ void moveDistanceFB(float dist){
       Omni.setCarSlow2Stop(uptime);
     Omni.setCarAdvance(0);
   }
-  dt = (1000*abs(dist)/agvAdjSpeed) - agvAdjTime;
+  
+  dt = ((1000*abs(dist))/agvAdjSpeed) - agvAdjTime;
   Omni.setCarSpeedMMPS(agvAdjSpeed, agvAdjTime);
   Omni.delayMS(dt,false);
   allStop(agvAdjTime,agvAdjTime);
@@ -230,10 +240,10 @@ void adjRotateAngle(float angle){
         Omni.setCarSlow2Stop(uptime);
       Omni.setCarRotateRight(0);
     }
-  dt = 1000*((agvRadius*abs(angle))/(agvAdjSpeed));
+  dt = 1000*((agvRadius*abs(angle))/(agvAdjSpeed))-agvAdjTime;
   Omni.setCarSpeedMMPS(agvAdjSpeed, agvAdjTime);
   Omni.delayMS(dt,false);
-  rotStop(agvAdjSpeed);
+  rotStop(agvAdjSpeed,agvAdjTime);
 }
 
 //Stop all
@@ -265,42 +275,42 @@ void processCommand(){
     
   // Go forward
   }else if(!strncmp(buffer,"FORWARD",7)){
-    goForward(agvSpeed);
+    goForward(agvSpeed,uptime);
     printCom("Forward");
     
   // Go backward
   }else if(!strncmp(buffer,"BACKWARD",8)){
-    goBack(agvSpeed);
+    goBack(agvSpeed,uptime);
     printCom("Backward");
     
   // Go left
   }else if(!strncmp(buffer,"LEFT",4)){
-    goLeft(agvSpeed);
+    goLeft(agvSpeed,uptime);
     printCom("Left");
     
   // Go right
   }else if(!strncmp(buffer,"RIGHT",5)){
-    goRight(agvSpeed);
+    goRight(agvSpeed,uptime);
     printCom("Right");
     
   // Search forward
   }else if(!strncmp(buffer,"SFORWARD",8)){
-    goForward(agvSpeeds);
+    goForward(agvSpeeds,agvUptimes);
     printCom("sForward");
     
   // Search backward
   }else if(!strncmp(buffer,"SBACKWARD",9)){
-    goBack(agvSpeeds);
+    goBack(agvSpeeds,agvUptimes);
     printCom("sBackward");
     
   // Search left
   }else if(!strncmp(buffer,"SLEFT",5)){
-    goLeft(agvSpeeds);
+    goLeft(agvSpeeds,agvUptimes);
     printCom("sLeft");
     
   // Search right
   }else if(!strncmp(buffer,"SRIGHT",6)){
-    goRight(agvSpeeds);
+    goRight(agvSpeeds,agvUptimes);
     printCom("sRight");
         
   // Rotate given angle, +clockwise -counterclockwise [rad]
@@ -334,14 +344,22 @@ void processCommand(){
   // Lift
   }else if(!strncmp(buffer,"LIFT",4)){
     steps = rev*(liftDist/liftPerRev);
+    if(initLift){
+      stepper.moveTo(-2);
+      while(stepper.distanceToGo()!=0){
+        stepper.run();
+      }
+    
+    initLift = false;
+    }
     if(!lifted){
       stepper.moveTo(-steps);
       while(stepper.distanceToGo()!=0){
         stepper.run();
       }
-    lifted = true;
-    printCom("LIFT");
-  }
+      lifted = true;
+      printCom("LIFT");
+    }
   
   // Lower
   }else if(!strncmp(buffer,"LOWER",5)){
