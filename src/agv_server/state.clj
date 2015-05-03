@@ -7,9 +7,9 @@
 (def warehouse (atom [[ :free :station :free :free ]
                       [ :free :free    :free :free ]
                       [ :free :free    :free :free ]
-                      [ :free :free    :s-0  :s-1  ]]))
+                      [ :s-0  :free    :free :s-1  ]]))
 (def orders (atom {}))
-(def shelves (atom {:s-0 {:coords [3 2] :agv nil}
+(def shelves (atom {:s-0 {:coords [3 0] :agv nil}
                     :s-1 {:coords [3 3] :agv nil}
                     :station {:coords [0 1]}}))
 (def inventory (atom {"10000" :s-0
@@ -49,6 +49,7 @@
 (defn do-next-order
   [agv]
   (when-let [[id value] (first (filter #(-> % val :agv nil?) @orders))]
+    ;; TODO: take all orders on the same shelf here!
     (swap! orders assoc-in [id :agv] agv)
     (let [shelf (get-in @orders [id :shelf])
           to (get-in @shelves [shelf :coords])]
