@@ -135,10 +135,12 @@
   [agv to]
   (let [from (get-in @state [agv :ready])
         path (p/astar (get-map) from to)
-        [n & _] (p/directions path)
+        [n s & _] (p/directions path)
         stream (get-in @state [agv :stream])]
     (if-not (nil? n)
-      n
+      (if (= n s)
+        (str n " 2")
+        (str n " 1"))
       (let [cell (get-in @warehouse to)]
         (case (-> cell name (.split "-") first)
           "s" (lift-or-lower agv cell)
