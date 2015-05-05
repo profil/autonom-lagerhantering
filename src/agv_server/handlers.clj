@@ -84,7 +84,8 @@
   [[x y & params] session]
   (with-session @session
     (if (nil? y)
-      (str "ERROR No coordinates given")
+      (do (put-all-users [:error "AGV ur kurs, manuell justering nödvändig."])
+          (str "ERROR No coordinates given"))
       (let [ret (st/set-client-ready (:client @session)
                                      [(edn/read-string y)
                                       (edn/read-string x)])]

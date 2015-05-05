@@ -4,13 +4,13 @@
 
 (def state (atom {}))
 (def users (atom {}))
-(def warehouse (atom [[ :free :station :free :free ]
+(def warehouse (atom [[ :free :station :free :s-1  ]
                       [ :free :free    :free :free ]
                       [ :free :free    :free :free ]
-                      [ :s-0  :free    :free :s-1  ]]))
+                      [ :s-0  :free    :free :free ]]))
 (def orders (atom {}))
 (def shelves (atom {:s-0 {:coords [3 0] :agv nil}
-                    :s-1 {:coords [3 3] :agv nil}
+                    :s-1 {:coords [0 3] :agv nil}
                     :station {:coords [0 1]}}))
 (def inventory (atom {"10000" :s-0
                       "10001" :s-1
