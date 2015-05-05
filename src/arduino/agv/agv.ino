@@ -72,7 +72,7 @@ boolean stopp = false;
 // Stepper config
 //------------------------------------------------------------------------------
 // ** Possible to change via labview
-int liftDist = 20; //mm
+int liftDist = 40; //mm
 // **
 int stepPin = 13; // röd
 int dirPin = 6;   // gul. gul gnd, svart 0 RX, vit 1 TX
@@ -258,6 +258,10 @@ void allStop(unsigned int speedMMPS, int upTime){
 void printCom(String str){
   Serial.println(str);
 }
+void printDONE(){
+  Serial.print("DONE");
+}
+  
 void printCom(int i){
   Serial.println(i);
 }
@@ -271,130 +275,146 @@ void processCommand(){
   // Stop agv
   if(!strncmp(buffer,"STOP",4)){
     allStop(agvSpeed, uptime);
-    printCom("Stop");
+    printDONE();
+    //printCom("Stop");
     
   // Go forward
   }else if(!strncmp(buffer,"FORWARD",7)){
     goForward(agvSpeed,uptime);
-    printCom("Forward");
+    printDONE();
+//    printCom("Forward");
     
   // Go backward
   }else if(!strncmp(buffer,"BACKWARD",8)){
     goBack(agvSpeed,uptime);
-    printCom("Backward");
+    printDONE();
+
+    //printCom("Backward");
     
   // Go left
   }else if(!strncmp(buffer,"LEFT",4)){
     goLeft(agvSpeed,uptime);
-    printCom("Left");
+    printDONE();
+//    printCom("Left");
     
   // Go right
   }else if(!strncmp(buffer,"RIGHT",5)){
     goRight(agvSpeed,uptime);
-    printCom("Right");
+    printDONE();
+    //printCom("Right");
     
   // Search forward
   }else if(!strncmp(buffer,"SFORWARD",8)){
     goForward(agvSpeeds,agvUptimes);
-    printCom("sForward");
+    printDONE();
+    //printCom("sForward");
     
   // Search backward
   }else if(!strncmp(buffer,"SBACKWARD",9)){
     goBack(agvSpeeds,agvUptimes);
-    printCom("sBackward");
+    printDONE();
+    //printCom("sBackward");
     
   // Search left
   }else if(!strncmp(buffer,"SLEFT",5)){
     goLeft(agvSpeeds,agvUptimes);
-    printCom("sLeft");
+    printDONE();
+    //printCom("sLeft");
     
   // Search right
   }else if(!strncmp(buffer,"SRIGHT",6)){
     goRight(agvSpeeds,agvUptimes);
-    printCom("sRight");
+    printDONE();
+    //printCom("sRight");
         
   // Rotate given angle, +clockwise -counterclockwise [rad]
   }else if(!strncmp(buffer,"ROTATE",6)){
      char *state = strchr(buffer,' ')+1;
      float angle = atof(state);
      rotateAngle(angle);
-     printCom("Rotate");
+     printDONE();
+     //printCom("Rotate");
      
   // Adjust given distance +forward -backward [mm]
   }else if(!strncmp(buffer,"ADJFB",5)){
      char *state = strchr(buffer,' ')+1;
      float dist = atof(state);
      moveDistanceFB(dist);
-     printCom("moveDistanceFB");
+     printDONE();
+     //printCom("moveDistanceFB");
      
   // Adjust given distance +right -left [mm]
   }else if(!strncmp(buffer,"ADJRL",5)){
      char *state = strchr(buffer,' ')+1;
      float dist = atof(state);
      moveDistanceRL(dist);
-     printCom("moveDistanceRL");
+     printDONE();//printCom("moveDistanceRL");
      
   // Adjust given angle rotate +clockwise -counterclockwise [rad]
   }else if(!strncmp(buffer,"ADJROT",6)){
      char *state = strchr(buffer,' ')+1;
      float angle = atof(state);
      adjRotateAngle(angle);
-     printCom("adjRotate");
+     printDONE();//printCom("adjRotate");
      
   // Lift
   }else if(!strncmp(buffer,"LIFT",4)){
     steps = rev*(liftDist/liftPerRev);
-    if(initLift){
-      stepper.moveTo(-2);
-      while(stepper.distanceToGo()!=0){
-        stepper.run();
-      }
-    
-    initLift = false;
-    }
     if(!lifted){
-      stepper.moveTo(-steps);
+      stepper.move(-steps);
+      int i = 0;
       while(stepper.distanceToGo()!=0){
         stepper.run();
+        if(i==500){
+          Omni.delayMS(2,false);
+          i=0;
+        }
+        i++;
       }
       lifted = true;
-      printCom("LIFT");
     }
-  
+  printDONE();//printCom("LIFT");
   // Lower
   }else if(!strncmp(buffer,"LOWER",5)){
     steps = rev*(liftDist/liftPerRev);
     if(lifted){
-      stepper.moveTo(steps);
+      stepper.move(steps);
+      int i = 0;
       while(stepper.distanceToGo()!=0){
         stepper.run();
+        if(i==500){
+          Omni.delayMS(2,false);
+          i=0;
+        }
+        i++;
       }
       lifted = false;
-      printCom("LOWER");
     }
+    printDONE();//printCom("LOWER");
+
   // Set agv Speed
   }else if(!strncmp(buffer,"SETSPEED",8)){
      char *state = strchr(buffer,' ')+1;
      agvSpeed = atoi(state);
-     printCom("SETSPEED");
+     printDONE();//printCom("SETSPEED");
      
   // Set agv uptime
   }else if(!strncmp(buffer,"SETUPTIME",9)){
      char *state = strchr(buffer,' ')+1;
      uptime = atoi(state);
-     printCom("SETUPTIME");
+     printDONE();//printCom("SETUPTIME");
      
   // Set agv Regulate
   }else if(!strncmp(buffer,"SETREGULATE",11)){
      char *state = strchr(buffer,' ')+1;
      duration = atoi(state);
-     printCom("SETREGULATE");
+     printDONE();//printCom("SETREGULATE");
      
   // Set liftdist
   }else if(!strncmp(buffer,"HIGHT",5)){
      char *state = strchr(buffer,' ')+1;
      liftDist = atoi(state);
-     printCom("HIGHT");
+     printDONE();//printCom("HIGHT");
      
   // Get agv parameters
   }else if(!strncmp(buffer,"GETPARA",7)){
@@ -414,7 +434,7 @@ void processCommand(){
     
   // Invalid command
   }else{
-    printCom("ERROR, INVALID COMMAND");
+    Serial.print("ERROR");//printCom("ERROR, INVALID COMMAND");
   }
 }
     //Omni.demoActions(200,5000,500,false);
