@@ -101,7 +101,8 @@
 (defn block-handler
   [[direction & params] session]
   (with-session @session
-    (put-all-users [:warehouse (st/blocked-map (:client @session) direction)])))
+    (put-all-users [:warehouse (st/blocked-map (:client @session) direction)])
+    (put-all-users [:error "Varning, hinder upptäckt."])))
 
 (defn err-handler
   [command params session]
