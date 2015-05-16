@@ -93,7 +93,7 @@ AccelStepper stepper(1,stepPin,dirPin);
 int duration = 100;
 
 // Parameters when going F,B,R,L
-unsigned int agvSpeed = 200;
+unsigned int agvSpeed = 250;
 int uptime = 150;
 // **
 
@@ -259,7 +259,7 @@ void printCom(String str){
   Serial.println(str);
 }
 void printDONE(){
-  Serial.print("DONE");
+  Serial.print("D");
 }
   
 void printCom(int i){
@@ -330,7 +330,9 @@ void processCommand(){
   // Rotate given angle, +clockwise -counterclockwise [rad]
   }else if(!strncmp(buffer,"ROTATE",6)){
      char *state = strchr(buffer,' ')+1;
-     float angle = atof(state);
+     float angle = strtod(state,NULL);
+     //float angle = atof(state);
+     Serial.println(angle);
      rotateAngle(angle);
      printDONE();
      //printCom("Rotate");
@@ -338,7 +340,8 @@ void processCommand(){
   // Adjust given distance +forward -backward [mm]
   }else if(!strncmp(buffer,"ADJFB",5)){
      char *state = strchr(buffer,' ')+1;
-     float dist = atof(state);
+     float dist = strtod(state,NULL);
+    // float dist = atof(state);
      moveDistanceFB(dist);
      printDONE();
      //printCom("moveDistanceFB");
@@ -346,14 +349,16 @@ void processCommand(){
   // Adjust given distance +right -left [mm]
   }else if(!strncmp(buffer,"ADJRL",5)){
      char *state = strchr(buffer,' ')+1;
-     float dist = atof(state);
+     float dist = strtod(state,NULL);
+     //float dist = atof(state);
      moveDistanceRL(dist);
      printDONE();//printCom("moveDistanceRL");
      
   // Adjust given angle rotate +clockwise -counterclockwise [rad]
   }else if(!strncmp(buffer,"ADJROT",6)){
      char *state = strchr(buffer,' ')+1;
-     float angle = atof(state);
+     float angle = strtod(state,NULL);//
+     //float angle = atof(state);
      adjRotateAngle(angle);
      printDONE();//printCom("adjRotate");
      
@@ -371,13 +376,13 @@ void processCommand(){
         }
         i++;
       }
-      lifted = true;
+      //lifted = true;
     }
   printDONE();//printCom("LIFT");
   // Lower
   }else if(!strncmp(buffer,"LOWER",5)){
     steps = rev*(liftDist/liftPerRev);
-    if(lifted){
+    if(!lifted){
       stepper.move(steps);
       int i = 0;
       while(stepper.distanceToGo()!=0){
@@ -395,25 +400,25 @@ void processCommand(){
   // Set agv Speed
   }else if(!strncmp(buffer,"SETSPEED",8)){
      char *state = strchr(buffer,' ')+1;
-     agvSpeed = atoi(state);
+     agvSpeed = strtod(state,NULL);//atoi(state);
      printDONE();//printCom("SETSPEED");
      
   // Set agv uptime
   }else if(!strncmp(buffer,"SETUPTIME",9)){
      char *state = strchr(buffer,' ')+1;
-     uptime = atoi(state);
+     uptime = strtod(state,NULL);//atoi(state);
      printDONE();//printCom("SETUPTIME");
      
   // Set agv Regulate
   }else if(!strncmp(buffer,"SETREGULATE",11)){
      char *state = strchr(buffer,' ')+1;
-     duration = atoi(state);
+     duration = strtod(state,NULL);//atoi(state);
      printDONE();//printCom("SETREGULATE");
      
   // Set liftdist
   }else if(!strncmp(buffer,"HIGHT",5)){
      char *state = strchr(buffer,' ')+1;
-     liftDist = atoi(state);
+     liftDist = strtod(state,NULL);//atoi(state);
      printDONE();//printCom("HIGHT");
      
   // Get agv parameters
