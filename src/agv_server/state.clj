@@ -4,14 +4,14 @@
 
 (def state (atom {}))
 (def users (atom {}))
-(def warehouse (atom [[ :free :station :free :s-1  ]
-                      [ :free :free    :free :free ]
-                      [ :free :free    :free :free ]
-                      [ :s-0  :free    :free :free ]]))
+(def warehouse (atom [[ :s-0  :free :free    :s-1  ]
+                      [ :free :free :free    :free ]
+                      [ :free :free :free    :free ]
+                      [ :free :free :station :free ]]))
 (def orders (atom {}))
-(def shelves (atom {:s-0 {:coords [3 0] :agv nil}
+(def shelves (atom {:s-0 {:coords [0 0] :agv nil}
                     :s-1 {:coords [0 3] :agv nil}
-                    :station {:coords [0 1]}}))
+                    :station {:coords [3 2]}}))
 (def inventory (atom {"10000" :s-0
                       "10001" :s-1
                       "10002" :s-0
@@ -136,16 +136,19 @@
   (let [from (get-in @state [agv :ready])
         path (p/astar (get-map) from to)
         [n s & _] (p/directions path)
-        stream (get-in @state [agv :stream])]
+        stream (get-in @state [agv :stream])
+        cell (get-in @warehouse to)]
+    (println (-> cell name (.split "-") first))
     (if-not (nil? n)
       (if (= n s)
-        (str n " 2")
+        (if (= (-> cell name (.split "-") first) "s")
+          (str n " 1")
+          (str n " 2"))
         (str n " 1"))
-      (let [cell (get-in @warehouse to)]
-        (case (-> cell name (.split "-") first)
-          "s" (lift-or-lower agv cell)
-          "station" (swap! orders orders-done (get-in @state [agv :lift]))
-          "ERROR Unknown error")))))
+      (case (-> cell name (.split "-") first)
+        "s" (lift-or-lower agv cell)
+        "station" (swap! orders orders-done (get-in @state [agv :lift]))
+        "ERROR Unknown error"))))
 
 
 (defn get-part
@@ -165,8 +168,7 @@
 (defn return-shelf
   [agv shelf]
   (let [to (get-in @shelves [shelf :coords])]
-    (swap! state assoc-in [agv :busy] to)
-    (s/put! (get-in @state [agv :stream]) (agv-go-to agv to))))
+    (swap! state assoc-in [agv :busy] to)))
 
 (defn accept-order
   [id]
